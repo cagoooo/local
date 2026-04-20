@@ -1,0 +1,33 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 本機測試/暫存檔(部署到 GitHub Pages 時不需要)
+_dump.json
+_tmp/
+
+# 實際學生資料(敏感,不要推上公開 repo!)
+三年級_未分班.xlsx
+四年級_未分班.xlsx
+五年級_未分班.xlsx
+六年級_未分班.xlsx
+*_真實名單.xlsx
+*_實際資料.xlsx
+實際新名冊*.xlsx
+
+# 保留 demo-new-roster.xlsx 作為使用者參考範例
+!demo-new-roster.xlsx
