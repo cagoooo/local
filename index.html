@@ -517,6 +517,192 @@
   }
 
   /* ==========================================================
+     Dropzone inline preview button (appears after success)
+     ========================================================== */
+  .preview-btn-inline {
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: var(--surface);
+    border: 1.5px solid var(--success);
+    border-radius: var(--r-full);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--success-dark);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all var(--t-fast) var(--ease-out);
+    position: relative;
+    z-index: 2;
+  }
+  [data-theme="dark"] .preview-btn-inline {
+    background: rgba(16,185,129,0.1);
+    color: #6ee7b7;
+    border-color: rgba(16,185,129,0.5);
+  }
+  .preview-btn-inline:hover {
+    background: var(--success);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  [data-theme="dark"] .preview-btn-inline:hover { background: var(--success); color: white; }
+  .preview-btn-inline:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-glow-success);
+  }
+  .preview-btn-inline .eye { font-size: 14px; }
+  .preview-btn-inline .count {
+    background: rgba(255,255,255,0.25);
+    padding: 1px 8px;
+    border-radius: var(--r-full);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .preview-btn-inline:not(:hover) .count {
+    background: var(--success-bg);
+    color: var(--success-dark);
+  }
+  [data-theme="dark"] .preview-btn-inline:not(:hover) .count {
+    background: rgba(16,185,129,0.2);
+    color: #6ee7b7;
+  }
+
+  /* Stat chip clickable variant */
+  .stat-chip.clickable {
+    cursor: pointer;
+    user-select: none;
+    transition: all var(--t-fast) var(--ease-out);
+  }
+  .stat-chip.clickable:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-chip.clickable:hover::after {
+    content: ' 👁';
+    font-size: 10px;
+    margin-left: 2px;
+  }
+
+  /* ==========================================================
+     Preview modal — wider + table-friendly
+     ========================================================== */
+  .preview-modal {
+    max-width: 820px !important;
+    padding: 24px 0 0 !important;
+    display: flex;
+    flex-direction: column;
+    max-height: 88vh;
+  }
+  .preview-modal .modal-title,
+  .preview-modal .modal-sub { padding: 0 24px; }
+  .preview-toolbar {
+    padding: 14px 24px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .preview-toolbar input[type="search"] {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    font-size: 13px;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .preview-toolbar input[type="search"]:focus {
+    outline: none;
+    border-color: var(--brand-500);
+    box-shadow: var(--shadow-glow);
+  }
+  .preview-toolbar select {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    font-size: 13px;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .preview-table-wrap {
+    flex: 1;
+    overflow: auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .preview-table-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
+  .preview-table-wrap::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+  .preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .preview-table thead {
+    position: sticky;
+    top: 0;
+    background: var(--surface-2);
+    z-index: 1;
+  }
+  .preview-table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  .preview-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .preview-table tbody tr { transition: background var(--t-fast); }
+  .preview-table tbody tr:hover { background: var(--surface-2); }
+  .preview-table td.num { text-align: right; }
+  .preview-table td.name b { font-weight: 700; }
+  .preview-table td.tribe {
+    color: var(--text-subtle);
+    font-size: 12px;
+  }
+  .preview-foot {
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    background: var(--surface-2);
+  }
+  .preview-foot .hint {
+    font-size: 12px;
+    color: var(--text-subtle);
+  }
+  .preview-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-subtle);
+    font-size: 14px;
+  }
+  .preview-modal .modal-actions {
+    padding: 0 24px 20px;
+    margin-top: 12px;
+  }
+
+  /* ==========================================================
      Template download card (Step 2 CTA)
      ========================================================== */
   .template-card {
@@ -1707,6 +1893,11 @@
         <div class="dropzone-text" id="oldText">點擊或拖曳上傳</div>
         <div class="dropzone-hint">支援 .xlsx / .xls・可多選</div>
         <div class="dropzone-file" id="oldFileName"></div>
+        <button type="button" class="preview-btn-inline" id="oldPreviewBtn" style="display:none" data-preview="old">
+          <span class="eye">👁</span>
+          <span>查看完整解析內容</span>
+          <span class="count" id="oldPreviewCount">0</span>
+        </button>
       </label>
       <div class="stats" id="oldStats"></div>
     </div>
@@ -1743,6 +1934,11 @@
         <div class="dropzone-text" id="newText">點擊或拖曳上傳</div>
         <div class="dropzone-hint">支援 .xlsx / .xls・可多選</div>
         <div class="dropzone-file" id="newFileName"></div>
+        <button type="button" class="preview-btn-inline" id="newPreviewBtn" style="display:none" data-preview="new">
+          <span class="eye">👁</span>
+          <span>查看完整解析內容</span>
+          <span class="count" id="newPreviewCount">0</span>
+        </button>
       </label>
       <div class="stats" id="newStats"></div>
     </div>
@@ -3509,8 +3705,218 @@ function generateMarkdownReport(d) {
 
 $('reportBtn').addEventListener('click', generateSummary);
 
-// Auto-save state whenever dropzones successfully load
-// (saveState is called from doMatch already)
+// ============================================================
+// Preview modals — click on dropzone (after success) or stat chips
+// ============================================================
+function openOldPreview() {
+  if (!state.oldStudents.length) { toast('尚無舊名單資料', 'warning'); return; }
+  const students = state.oldStudents;
+  const classes = [...new Set(students.map(s => s.oldClass))].sort((a, b) => a.localeCompare(b, 'zh-Hant'));
+  const langs = [...new Set(students.map(s => languageCategory(s.language)))].sort();
+
+  const classOpts = classes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  const langOpts = langs.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('');
+
+  const html = `
+    <h3 class="modal-title">📋 舊本土語名單預覽</h3>
+    <p class="modal-sub">共 <b>${students.length}</b> 位學生・<b>${classes.length}</b> 個班級・<b>${langs.length}</b> 種語別・請核對資料正確後再進行配對</p>
+    <div class="preview-toolbar">
+      <input type="search" id="prvSearch" placeholder="🔍 搜尋姓名、班級、語別..." />
+      <select id="prvClass"><option value="">全部班級</option>${classOpts}</select>
+      <select id="prvLang"><option value="">全部語別</option>${langOpts}</select>
+    </div>
+    <div class="preview-table-wrap">
+      <table class="preview-table">
+        <thead>
+          <tr>
+            <th style="width:48px">#</th>
+            <th>姓名</th>
+            <th>舊班級</th>
+            <th style="width:70px">舊座號</th>
+            <th>語別</th>
+            <th>族別 / 備註</th>
+            <th>任教老師</th>
+          </tr>
+        </thead>
+        <tbody id="prvBody"></tbody>
+      </table>
+    </div>
+    <div class="preview-foot">
+      <span>顯示 <b id="prvCount">${students.length}</b> / ${students.length} 筆</span>
+      <span class="hint">Tip:可依班級/語別過濾 · 按 Esc 關閉</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-close>關閉</button>
+    </div>`;
+  const m = openModal(html);
+  m.card.classList.add('preview-modal');
+
+  const renderRows = () => {
+    const q = normalizeName($('prvSearch').value);
+    const cls = $('prvClass').value;
+    const lang = $('prvLang').value;
+    const filtered = students.filter(s => {
+      if (cls && s.oldClass !== cls) return false;
+      if (lang && languageCategory(s.language) !== lang) return false;
+      if (q) {
+        const hay = normalizeName(s.name + s.oldClass + s.language + (s.tribe || ''));
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    $('prvBody').innerHTML = filtered.map((s, i) => `
+      <tr>
+        <td class="num" style="color:var(--text-subtle)">${i + 1}</td>
+        <td class="name"><b>${escapeHtml(s.name)}</b></td>
+        <td>${escapeHtml(s.oldClass)}</td>
+        <td class="num">${escapeHtml(s.oldSeat)}</td>
+        <td><span class="tag ${langTagClass(s.language)}">${escapeHtml(s.language || '')}</span></td>
+        <td class="tribe">${s.tribe ? escapeHtml(s.tribe) : '—'}</td>
+        <td style="color:var(--text-subtle)">${escapeHtml(s.teacher || '—')}</td>
+      </tr>
+    `).join('') || `<tr><td colspan="7"><div class="preview-empty">沒有符合條件的資料</div></td></tr>`;
+    $('prvCount').textContent = filtered.length;
+  };
+  ['prvSearch', 'prvClass', 'prvLang'].forEach(id => {
+    $(id).addEventListener('input', renderRows);
+    $(id).addEventListener('change', renderRows);
+  });
+  renderRows();
+  m.card.querySelector('[data-close]').addEventListener('click', m.close);
+}
+
+function openNewPreview() {
+  if (!state.newRoster.length) { toast('尚無新名冊資料', 'warning'); return; }
+  const students = state.newRoster;
+  const classes = [...new Set(students.map(s => s.newClass))].sort((a, b) => a.localeCompare(b, 'zh-Hant'));
+  const sheets = [...new Set(students.map(s => s.sheet).filter(Boolean))].sort();
+
+  const classOpts = classes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  const sheetOpts = sheets.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+
+  // Warn if there are issues
+  const dupMap = new Map();
+  for (const s of students) {
+    const k = normalizeName(s.name);
+    dupMap.set(k, (dupMap.get(k) || 0) + 1);
+  }
+  const dupCount = [...dupMap.values()].filter(v => v > 1).length;
+  const warningBanner = dupCount ?
+    `<div class="alert alert-warn" style="margin:14px 24px 0">⚠️ 偵測到 <b>${dupCount}</b> 位重複姓名,請檢查後重新匯入</div>` : '';
+
+  const html = `
+    <h3 class="modal-title">📝 新編班名冊預覽</h3>
+    <p class="modal-sub">共 <b>${students.length}</b> 位學生・<b>${classes.length}</b> 個班級${sheets.length > 1 ? `・<b>${sheets.length}</b> 個工作表` : ''}・請核對資料正確後再進行配對</p>
+    ${warningBanner}
+    <div class="preview-toolbar">
+      <input type="search" id="prvSearch" placeholder="🔍 搜尋姓名或班級..." />
+      <select id="prvClass"><option value="">全部班級</option>${classOpts}</select>
+      ${sheets.length > 1 ? `<select id="prvSheet"><option value="">全部工作表</option>${sheetOpts}</select>` : ''}
+    </div>
+    <div class="preview-table-wrap">
+      <table class="preview-table">
+        <thead>
+          <tr>
+            <th style="width:48px">#</th>
+            <th>姓名</th>
+            <th>新班級</th>
+            <th style="width:70px">新座號</th>
+            ${sheets.length > 1 ? '<th>來源工作表</th>' : ''}
+          </tr>
+        </thead>
+        <tbody id="prvBody"></tbody>
+      </table>
+    </div>
+    <div class="preview-foot">
+      <span>顯示 <b id="prvCount">${students.length}</b> / ${students.length} 筆</span>
+      <span class="hint">Tip:可依班級/工作表過濾 · 按 Esc 關閉</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-close>關閉</button>
+    </div>`;
+  const m = openModal(html);
+  m.card.classList.add('preview-modal');
+
+  const renderRows = () => {
+    const q = normalizeName($('prvSearch').value);
+    const cls = $('prvClass').value;
+    const sheet = $('prvSheet') ? $('prvSheet').value : '';
+    const filtered = students.filter(s => {
+      if (cls && s.newClass !== cls) return false;
+      if (sheet && s.sheet !== sheet) return false;
+      if (q) {
+        const hay = normalizeName(s.name + s.newClass);
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    $('prvBody').innerHTML = filtered.map((s, i) => `
+      <tr>
+        <td class="num" style="color:var(--text-subtle)">${i + 1}</td>
+        <td class="name"><b>${escapeHtml(s.name)}</b></td>
+        <td>${escapeHtml(s.newClass)}</td>
+        <td class="num">${escapeHtml(s.newSeat)}</td>
+        ${sheets.length > 1 ? `<td style="color:var(--text-subtle)">${escapeHtml(s.sheet || '—')}</td>` : ''}
+      </tr>
+    `).join('') || `<tr><td colspan="${sheets.length > 1 ? 5 : 4}"><div class="preview-empty">沒有符合條件的資料</div></td></tr>`;
+    $('prvCount').textContent = filtered.length;
+  };
+  ['prvSearch', 'prvClass', 'prvSheet'].forEach(id => {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener('input', renderRows);
+    el.addEventListener('change', renderRows);
+  });
+  renderRows();
+  m.card.querySelector('[data-close]').addEventListener('click', m.close);
+}
+
+// Preview button click handlers (stop propagation so file picker doesn't open)
+document.querySelectorAll('[data-preview]').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (btn.dataset.preview === 'old') openOldPreview();
+    else openNewPreview();
+  });
+});
+
+// Update preview button visibility + count when state changes
+// Hook into renderStats (already chained earlier)
+const _origRenderStatsPreview = renderStats;
+renderStats = function() {
+  _origRenderStatsPreview();
+  const oldBtn = $('oldPreviewBtn');
+  const newBtn = $('newPreviewBtn');
+  if (oldBtn) {
+    if (state.oldStudents.length) {
+      oldBtn.style.display = 'inline-flex';
+      $('oldPreviewCount').textContent = state.oldStudents.length;
+    } else {
+      oldBtn.style.display = 'none';
+    }
+  }
+  if (newBtn) {
+    if (state.newRoster.length) {
+      newBtn.style.display = 'inline-flex';
+      $('newPreviewCount').textContent = state.newRoster.length;
+    } else {
+      newBtn.style.display = 'none';
+    }
+  }
+  // Make primary stat chips clickable to also open preview
+  document.querySelectorAll('#oldStats .stat-chip.primary').forEach(c => {
+    c.classList.add('clickable');
+    c.title = '點擊查看完整解析內容';
+    c.onclick = openOldPreview;
+  });
+  document.querySelectorAll('#newStats .stat-chip.primary').forEach(c => {
+    c.classList.add('clickable');
+    c.title = '點擊查看完整解析內容';
+    c.onclick = openNewPreview;
+  });
+};
+renderStats();
 </script>
 </body>
 </html>
