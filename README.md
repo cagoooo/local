@@ -2,7 +2,7 @@
 
 > 小學升級分班後,自動更新本土語選修名單的網頁工具。上傳舊名單 + 新編班名冊,用「姓名」自動比對(含錯字模糊比對),即時產出更新後的班級/座號對照表與新本土語名單。
 
-![version](https://img.shields.io/badge/version-2.1-blueviolet) ![offline](https://img.shields.io/badge/offline-ready-green) ![stack](https://img.shields.io/badge/stack-Vanilla%20JS-yellow) ![darkmode](https://img.shields.io/badge/dark%20mode-✓-purple) ![a11y](https://img.shields.io/badge/a11y-WCAG%20AA-blue) ![social](https://img.shields.io/badge/OG%20image-✓-ff69b4) ![shortcuts](https://img.shields.io/badge/⌨️%20shortcuts-✓-lightgrey)
+![version](https://img.shields.io/badge/version-2.2-blueviolet) ![offline](https://img.shields.io/badge/offline-ready-green) ![stack](https://img.shields.io/badge/stack-Vanilla%20JS-yellow) ![darkmode](https://img.shields.io/badge/dark%20mode-✓-purple) ![a11y](https://img.shields.io/badge/a11y-WCAG%20AA-blue) ![social](https://img.shields.io/badge/OG%20image-✓-ff69b4) ![shortcuts](https://img.shields.io/badge/⌨️%20shortcuts-✓-lightgrey) ![preview](https://img.shields.io/badge/👁%20preview-✓-10b981) [![live](https://img.shields.io/badge/🌐%20live-cagoooo.github.io%2Flocal-0ea5e9)](https://cagoooo.github.io/local/)
 
 ## 目錄
 
@@ -32,6 +32,19 @@
 | **Excel 匯出** | 兩種格式:**平面對照表**(含清名、族別、狀態)+ **矩陣名單**(依新班級分組,含異動標記、疑似配對區、多候選區、未配對附錄) |
 | **UI/UX** | Noto Sans TC 繁中字型、**深色模式自動切換**、RWD 響應式、sticky navigation、錯落 fade-in 動畫、支援 `prefers-reduced-motion` |
 | **完全離線** | 所有解析、比對、匯出都在瀏覽器本機執行,學生資料不會上傳到任何伺服器 |
+
+---
+
+## 🚀 v2.2 新增亮點(最新)
+
+讓使用者在配對前**先驗證解析結果正確性**,降低「早知道就…」的錯誤成本。
+
+| 🆕 | 項目 | 價值 |
+|:--:|------|------|
+| 📥 | **範本下載 CTA 升級** | ghost 小按鈕 → 寬版資訊卡(icon + 徽章 + 描述 + CTA)· 整卡可點 |
+| 👁 | **上傳後預覽 Modal(舊名單)** | 點綠色膠囊按鈕或統計 chip → 開啟寬版 modal,7 欄完整表格 + 搜尋 + 班級/語別篩選 |
+| 👁 | **上傳後預覽 Modal(新名冊)** | 同上,並自動偵測重複姓名警示 |
+| 🌐 | **GitHub Pages 正式上線** | **https://cagoooo.github.io/local/** · HTTPS 強制 |
 
 ---
 
@@ -457,10 +470,24 @@ native-lang-matcher/
 
 | 版本 | 日期 | 功能數 | 主要變動 |
 |------|------|:-----:|---------|
-| **v2.1** | 2026-04-20 | **27** | Toast、⌨️ 快捷鍵、重置、動畫計數、多候選 modal、列印模式、LocalStorage 記憶、摘要報告、favicon、OG 預覽圖 |
+| **v2.2** | 2026-04-21 | **30** | 範本下載 CTA 資訊卡 + 上傳後預覽 Modal(舊名單 + 新名冊)+ GitHub Pages 正式上線 |
+| **v2.1** | 2026-04-20 | 27 | Toast、⌨️ 快捷鍵、重置、動畫計數、多候選 modal、列印模式、LocalStorage 記憶、摘要報告、favicon、OG 預覽圖 |
 | **v2.0** | 2026-04-20 | 18 | UI/UX 大升級(Noto Sans TC + Indigo 漸層 + 深色模式 + Stepper + Hero + 卡片格說明區) |
 | **v1.1** | 2026-04-20 | 12 | 高優先 4 項優化(範本下載、模糊比對、族別保留、多檔上傳) |
 | **v1.0** | 2026-04-20 | 8 | 初版,基本配對功能 |
+
+---
+
+## 🌐 線上使用 / 訂閱更新
+
+| 入口 | URL |
+|------|-----|
+| 🏠 **立即使用** | **https://cagoooo.github.io/local/** |
+| 📦 GitHub Repo | https://github.com/cagoooo/local |
+| 🏷️ 最新 Release | https://github.com/cagoooo/local/releases |
+| 📋 優化藍圖 | [OPTIMIZATION.md](OPTIMIZATION.md) |
+
+**Watch / Star** 本 repo 可收到新版通知。
 
 ---
 
