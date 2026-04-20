@@ -1,0 +1,26 @@
+{
+  "name": "本土語分班配對系統",
+  "short_name": "本土語配對",
+  "description": "小學升級分班後,自動更新本土語選修名單的網頁工具",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fafbff",
+  "theme_color": "#4f46e5",
+  "lang": "zh-Hant",
+  "icons": [
+    {
+      "src": "android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

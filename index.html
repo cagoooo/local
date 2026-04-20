@@ -1,0 +1,3368 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>本土語分班配對系統 · 升級分班後自動更新選修名單</title>
+<meta name="description" content="小學升級分班後,自動以姓名比對更新本土語選修名單。支援錯字模糊比對、多檔同時處理、深色模式,100% 瀏覽器本機運算,資料不上雲。" />
+<meta name="keywords" content="本土語,分班,配對,小學,國小,名單,Excel,閩南語,客語,族語" />
+<meta name="author" content="桃園市國小資訊教師" />
+<meta name="theme-color" content="#4f46e5" />
+
+<!-- Favicon (relative paths work on any GitHub Pages sub-path) -->
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+
+<!-- Open Graph / Facebook / LINE -->
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="zh_TW" />
+<meta property="og:site_name" content="本土語分班配對系統" />
+<meta property="og:title" content="本土語分班配對系統 · 分班更新一氣呵成" />
+<meta property="og:description" content="上傳舊名單 + 新編班名冊 → 自動以姓名配對,即時更新班級座號。含錯字模糊比對、深色模式、100% 本機運算。" />
+<meta property="og:image" content="og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="本土語分班配對系統 — 升級分班後自動更新選修名單" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="本土語分班配對系統 · 分班更新一氣呵成" />
+<meta name="twitter:description" content="上傳舊名單 + 新編班名冊 → 自動以姓名配對。含錯字模糊比對、深色模式、100% 本機運算。" />
+<meta name="twitter:image" content="og-image.png" />
+
+<!-- LINE (uses OG tags but prefers square image) -->
+<meta property="og:image:secure_url" content="og-image.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  /* ==========================================================
+     Design Tokens — Light
+     ========================================================== */
+  :root {
+    /* Brand */
+    --brand-50:  #eef2ff;
+    --brand-100: #e0e7ff;
+    --brand-200: #c7d2fe;
+    --brand-300: #a5b4fc;
+    --brand-400: #818cf8;
+    --brand-500: #6366f1;
+    --brand-600: #4f46e5;
+    --brand-700: #4338ca;
+    --brand-800: #3730a3;
+    --brand-900: #312e81;
+
+    /* Accent (for gradients / hero) */
+    --accent-500: #a855f7;
+    --accent-600: #9333ea;
+
+    /* Semantic */
+    --success:       #10b981;
+    --success-dark:  #047857;
+    --success-bg:    #d1fae5;
+    --success-tint:  #ecfdf5;
+    --warning:       #f59e0b;
+    --warning-dark:  #b45309;
+    --warning-bg:    #fef3c7;
+    --warning-tint:  #fffbeb;
+    --danger:        #ef4444;
+    --danger-dark:   #b91c1c;
+    --danger-bg:     #fee2e2;
+    --danger-tint:   #fef2f2;
+    --info:          #06b6d4;
+    --info-bg:       #cffafe;
+    --info-tint:     #ecfeff;
+
+    /* Neutrals */
+    --gray-50:  #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+
+    /* Surface (applied via data-theme) */
+    --bg:          #fafbff;
+    --bg-gradient: radial-gradient(ellipse at top, #eef2ff 0%, transparent 40%), radial-gradient(ellipse at bottom, #f0f9ff 0%, transparent 50%), #fafbff;
+    --surface:     #ffffff;
+    --surface-2:   #f8fafc;
+    --surface-3:   #f1f5f9;
+    --border:      #e2e8f0;
+    --border-strong: #cbd5e1;
+    --text:        #0f172a;
+    --text-muted:  #475569;
+    --text-subtle: #64748b;
+
+    /* Back-compat aliases (preserved for legacy CSS rules below) */
+    --primary:        var(--brand-600);
+    --primary-dark:   var(--brand-800);
+    --primary-light:  var(--brand-100);
+    --success-light:  var(--success-bg);
+    --warning-light:  var(--warning-bg);
+    --danger-light:   var(--danger-bg);
+
+    /* Shadows */
+    --shadow-sm:  0 1px 2px 0 rgba(15, 23, 42, 0.04);
+    --shadow-md:  0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+    --shadow-lg:  0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+    --shadow-xl:  0 20px 25px -5px rgba(15, 23, 42, 0.10), 0 8px 10px -6px rgba(15, 23, 42, 0.06);
+    --shadow-glow: 0 0 0 4px rgba(99, 102, 241, 0.14);
+    --shadow-glow-success: 0 0 0 4px rgba(16, 185, 129, 0.14);
+
+    /* Radius */
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 14px;
+    --r-xl: 20px;
+    --r-2xl: 28px;
+    --r-full: 9999px;
+
+    /* Gradients */
+    --grad-brand: linear-gradient(135deg, var(--brand-600) 0%, var(--accent-600) 100%);
+    --grad-brand-soft: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+    --grad-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+
+    /* Motion */
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --t-fast: 150ms;
+    --t-base: 240ms;
+    --t-slow: 400ms;
+  }
+
+  /* ==========================================================
+     Dark mode tokens
+     ========================================================== */
+  [data-theme="dark"] {
+    --bg: #020617;
+    --bg-gradient: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(168, 85, 247, 0.10) 0%, transparent 50%), #020617;
+    --surface:   #0f172a;
+    --surface-2: #1e293b;
+    --surface-3: #334155;
+    --border:       #1e293b;
+    --border-strong:#334155;
+    --text:        #f1f5f9;
+    --text-muted:  #cbd5e1;
+    --text-subtle: #94a3b8;
+    --primary-light: rgba(99, 102, 241, 0.15);
+    --grad-brand-soft: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.10) 100%);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.40);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.40), 0 2px 4px -2px rgba(0, 0, 0, 0.30);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.50), 0 4px 6px -4px rgba(0, 0, 0, 0.30);
+    --shadow-xl: 0 20px 40px -10px rgba(0, 0, 0, 0.60);
+  }
+
+  /* ==========================================================
+     Base
+     ========================================================== */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "palt", "kern";
+    margin: 0;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color var(--t-base) var(--ease-out), color var(--t-base) var(--ease-out);
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace; font-size: 0.9em; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ==========================================================
+     Layout
+     ========================================================== */
+  .container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 clamp(16px, 3vw, 32px) 80px;
+  }
+
+  /* Top nav — sticky with blur */
+  .topnav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px clamp(16px, 3vw, 32px);
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .topnav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .topnav-brand .logo {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--r-md);
+    background: var(--grad-brand);
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 16px;
+    box-shadow: var(--shadow-md);
+  }
+  .topnav-actions { display: flex; gap: 8px; align-items: center; }
+  .theme-toggle, .icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: all var(--t-fast) var(--ease-out);
+    font-size: 16px;
+  }
+  .theme-toggle:hover, .icon-btn:hover {
+    background: var(--surface-2);
+    border-color: var(--border-strong);
+    color: var(--text);
+    transform: translateY(-1px);
+  }
+
+  /* ==========================================================
+     Hero
+     ========================================================== */
+  .hero {
+    text-align: center;
+    padding: clamp(28px, 5vw, 56px) 16px clamp(32px, 5vw, 48px);
+    position: relative;
+  }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: var(--r-full);
+    background: var(--grad-brand-soft);
+    color: var(--brand-700);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    border: 1px solid var(--brand-200);
+  }
+  [data-theme="dark"] .hero-eyebrow { color: var(--brand-300); border-color: rgba(99,102,241,0.3); }
+  .hero-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand-600); animation: pulse 2s infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.4); }
+  }
+  .hero h1 {
+    margin: 0 0 16px;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+  .hero h1 .accent {
+    background: var(--grad-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero-sub {
+    margin: 0 auto;
+    max-width: 640px;
+    font-size: clamp(15px, 1.8vw, 18px);
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .hero-highlights {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+  .hero-highlight {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-full);
+    font-size: 13px;
+    color: var(--text-muted);
+    box-shadow: var(--shadow-sm);
+    font-weight: 500;
+  }
+  .hero-highlight .ico { font-size: 14px; }
+
+  /* ==========================================================
+     Progress stepper
+     ========================================================== */
+  .stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 16px 0 32px;
+    flex-wrap: wrap;
+  }
+  .stepper-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    border-radius: var(--r-full);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+    transition: all var(--t-base) var(--ease-out);
+  }
+  .stepper-item.active {
+    background: var(--brand-600);
+    color: white;
+    border-color: var(--brand-600);
+    box-shadow: var(--shadow-md), 0 0 0 4px rgba(99,102,241,0.2);
+  }
+  .stepper-item.done {
+    background: var(--success-bg);
+    color: var(--success-dark);
+    border-color: var(--success);
+  }
+  [data-theme="dark"] .stepper-item.done { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+  .stepper-item .step-dot {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--gray-200);
+    color: var(--gray-600);
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .stepper-item.active .step-dot { background: rgba(255,255,255,0.25); color: white; }
+  .stepper-item.done .step-dot { background: var(--success); color: white; }
+  .stepper-connector {
+    width: 32px;
+    height: 2px;
+    background: var(--border);
+    margin: 0 4px;
+  }
+  .stepper-connector.done { background: var(--success); }
+
+  /* ==========================================================
+     Cards
+     ========================================================== */
+  .steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(16px, 2vw, 24px);
+    margin-bottom: 24px;
+  }
+  @media (max-width: 900px) { .steps { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: clamp(20px, 2.5vw, 28px);
+    box-shadow: var(--shadow-md);
+    transition: box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out), border-color var(--t-base) var(--ease-out);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: var(--grad-brand);
+    opacity: 0;
+    transition: opacity var(--t-base) var(--ease-out);
+  }
+  .card:hover { box-shadow: var(--shadow-lg); border-color: var(--border-strong); }
+  .card:focus-within::before, .card.step-card:hover::before { opacity: 1; }
+  .card.step-card { position: relative; }
+  .card.step-card.done::before { opacity: 1; background: var(--grad-success); }
+
+  .card h2 {
+    margin: 0 0 6px;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text);
+  }
+  .card h2 small {
+    font-weight: 400;
+    color: var(--text-subtle);
+    font-size: 13px;
+  }
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: var(--r-md);
+    background: var(--grad-brand);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: var(--shadow-md);
+    flex-shrink: 0;
+  }
+  .hint {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0 0 16px;
+    line-height: 1.6;
+  }
+  .hint b { color: var(--text); font-weight: 600; }
+
+  /* ==========================================================
+     Dropzone
+     ========================================================== */
+  .dropzone {
+    position: relative;
+    border: 2px dashed var(--border-strong);
+    border-radius: var(--r-lg);
+    padding: clamp(28px, 4vw, 44px) 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--t-base) var(--ease-out);
+    background: var(--surface-2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+  }
+  .dropzone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, var(--brand-100) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity var(--t-base) var(--ease-out);
+    pointer-events: none;
+  }
+  [data-theme="dark"] .dropzone::before { background: radial-gradient(circle at center, rgba(99,102,241,0.15) 0%, transparent 70%); }
+  .dropzone:hover, .dropzone.dragover {
+    border-color: var(--brand-500);
+    background: var(--surface);
+    transform: translateY(-1px);
+  }
+  .dropzone:hover::before, .dropzone.dragover::before { opacity: 1; }
+  .dropzone.loaded {
+    border-style: solid;
+    border-color: var(--success);
+    background: var(--success-tint);
+  }
+  [data-theme="dark"] .dropzone.loaded { background: rgba(16,185,129,0.08); }
+  .dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .dropzone-icon {
+    width: 52px; height: 52px;
+    border-radius: var(--r-md);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--t-base) var(--ease-spring);
+  }
+  .dropzone:hover .dropzone-icon { transform: translateY(-2px) rotate(-4deg); box-shadow: var(--shadow-md); }
+  .dropzone.loaded .dropzone-icon { background: var(--success); color: white; border-color: var(--success); }
+  .dropzone-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .dropzone-file {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-subtle);
+    word-break: break-all;
+    max-width: 100%;
+  }
+  .dropzone-file div { margin: 2px 0; }
+  .dropzone-hint {
+    font-size: 12px;
+    color: var(--text-subtle);
+  }
+
+  /* ==========================================================
+     Stats chips
+     ========================================================== */
+  .stats {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--border);
+  }
+  .stat-chip {
+    padding: 5px 12px;
+    border-radius: var(--r-full);
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .stat-chip.primary {
+    background: var(--grad-brand);
+    color: white;
+    border-color: transparent;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-chip.success { background: var(--success-bg); color: var(--success-dark); border-color: var(--success); }
+  .stat-chip.warning { background: var(--warning-bg); color: var(--warning-dark); border-color: var(--warning); }
+  .stat-chip.danger { background: var(--danger-bg); color: var(--danger-dark); border-color: var(--danger); }
+  [data-theme="dark"] .stat-chip.success { background: rgba(16,185,129,0.15); color: #6ee7b7; border-color: rgba(16,185,129,0.4); }
+  [data-theme="dark"] .stat-chip.warning { background: rgba(245,158,11,0.15); color: #fcd34d; border-color: rgba(245,158,11,0.4); }
+  [data-theme="dark"] .stat-chip.danger { background: rgba(239,68,68,0.15); color: #fca5a5; border-color: rgba(239,68,68,0.4); }
+
+  /* ==========================================================
+     Buttons
+     ========================================================== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border: 1px solid transparent;
+    border-radius: var(--r-md);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--t-fast) var(--ease-out);
+    user-select: none;
+    line-height: 1;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible { outline: none; box-shadow: var(--shadow-glow); }
+  .btn-primary {
+    background: var(--grad-brand);
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn-primary:disabled { background: var(--gray-300); cursor: not-allowed; opacity: 0.7; }
+  .btn-success {
+    background: var(--grad-success);
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-success:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn-ghost {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text-muted);
+  }
+  .btn-ghost:hover { background: var(--surface-2); border-color: var(--border-strong); color: var(--text); }
+  .btn-sm { padding: 7px 12px; font-size: 13px; }
+
+  /* ==========================================================
+     Help / Details
+     ========================================================== */
+  details.help {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    color: var(--text-muted);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--t-base) var(--ease-out);
+  }
+  details.help[open] { box-shadow: var(--shadow-md); }
+  details.help summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text);
+    font-size: 14px;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  details.help summary::-webkit-details-marker { display: none; }
+  details.help summary::before {
+    content: '▸';
+    transition: transform var(--t-fast) var(--ease-out);
+    color: var(--brand-600);
+    font-size: 12px;
+  }
+  details.help[open] summary::before { transform: rotate(90deg); }
+  details.help pre {
+    margin: 12px 0 0;
+    padding: 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow-x: auto;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+  }
+  details.help ul { color: var(--text-muted); }
+  details.help b, details.help u { color: var(--text); }
+
+  /* Help — structured sections */
+  .help-body { padding-top: 18px; }
+  .help-section + .help-section {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px dashed var(--border);
+  }
+  .help-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.005em;
+  }
+  .help-section-title .ico {
+    width: 26px; height: 26px;
+    display: grid; place-items: center;
+    background: var(--grad-brand-soft);
+    border-radius: var(--r-sm);
+    font-size: 14px;
+  }
+  .help-section-sub {
+    margin: 0 0 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* Sample table inside help */
+  .sample-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    font-size: 13.5px;
+    margin: 8px 0 14px;
+  }
+  .sample-table thead { background: var(--surface-2); }
+  .sample-table th, .sample-table td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .sample-table th {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: none;
+    letter-spacing: 0.05em;
+  }
+  .sample-table tr:last-child td { border-bottom: none; }
+  .sample-table td { color: var(--text); font-variant-numeric: tabular-nums; }
+  .sample-table td.required::before {
+    content: '●';
+    color: var(--brand-500);
+    font-size: 8px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  /* Field alias chips */
+  .field-aliases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .field-alias {
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    font-size: 12.5px;
+  }
+  .field-alias-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .field-alias-values { display: flex; flex-wrap: wrap; gap: 4px; }
+  .code-chip {
+    display: inline-block;
+    padding: 2px 8px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11.5px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    color: var(--text);
+  }
+
+  /* Feature grid */
+  .feat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .feat-card {
+    position: relative;
+    padding: 14px 16px 14px 18px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    transition: all var(--t-fast) var(--ease-out);
+    overflow: hidden;
+  }
+  .feat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    width: 3px;
+    background: var(--brand-500);
+    border-radius: 2px 0 0 2px;
+  }
+  .feat-card:hover {
+    background: var(--surface);
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .feat-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .feat-card-title .ico {
+    width: 22px; height: 22px;
+    display: grid; place-items: center;
+    font-size: 13px;
+    border-radius: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .feat-card-desc {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .feat-card-desc code {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0px 5px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--brand-700);
+  }
+  [data-theme="dark"] .feat-card-desc code { color: var(--brand-300); }
+
+  .feat-card--info::before { background: var(--brand-500); }
+  .feat-card--info .feat-card-title .ico { background: var(--brand-100); border-color: var(--brand-200); color: var(--brand-700); }
+  [data-theme="dark"] .feat-card--info .feat-card-title .ico { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4); color: var(--brand-300); }
+
+  .feat-card--fuzzy::before { background: var(--warning); }
+  .feat-card--fuzzy .feat-card-title .ico { background: var(--warning-bg); border-color: var(--warning); color: var(--warning-dark); }
+  [data-theme="dark"] .feat-card--fuzzy .feat-card-title .ico { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.4); color: #fcd34d; }
+
+  .feat-card--ambiguous::before { background: #ec4899; }
+  .feat-card--ambiguous .feat-card-title .ico { background: #fce7f3; border-color: #fbcfe8; color: #9f1239; }
+  [data-theme="dark"] .feat-card--ambiguous .feat-card-title .ico { background: rgba(236,72,153,0.15); border-color: rgba(236,72,153,0.4); color: #fbcfe8; }
+
+  .feat-card--unmatched::before { background: var(--danger); }
+  .feat-card--unmatched .feat-card-title .ico { background: var(--danger-bg); border-color: var(--danger); color: var(--danger-dark); }
+  [data-theme="dark"] .feat-card--unmatched .feat-card-title .ico { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+
+  .feat-card--success::before { background: var(--success); }
+  .feat-card--success .feat-card-title .ico { background: var(--success-bg); border-color: var(--success); color: var(--success-dark); }
+  [data-theme="dark"] .feat-card--success .feat-card-title .ico { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); color: #6ee7b7; }
+
+  .feat-card--neutral::before { background: var(--gray-400); }
+  .feat-card--neutral .feat-card-title .ico { background: var(--surface); color: var(--text-muted); }
+
+  /* ==========================================================
+     Results / Alerts
+     ========================================================== */
+  .results-card { margin-top: 8px; }
+  .results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .results-header h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .results-header h2 .badge {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: var(--r-full);
+    background: var(--grad-brand);
+    color: white;
+    font-weight: 600;
+  }
+  .export-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .alert {
+    padding: 14px 18px;
+    border-radius: var(--r-md);
+    margin-bottom: 10px;
+    font-size: 14px;
+    line-height: 1.6;
+    border: 1px solid;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .alert code {
+    background: rgba(0,0,0,0.05);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  [data-theme="dark"] .alert code { background: rgba(255,255,255,0.1); }
+  .alert-warn {
+    background: var(--warning-tint);
+    color: var(--warning-dark);
+    border-color: var(--warning-bg);
+  }
+  [data-theme="dark"] .alert-warn { background: rgba(245,158,11,0.08); color: #fcd34d; border-color: rgba(245,158,11,0.3); }
+  .alert-info {
+    background: var(--info-tint);
+    color: var(--brand-800);
+    border-color: var(--brand-200);
+  }
+  [data-theme="dark"] .alert-info { background: rgba(99,102,241,0.08); color: #c7d2fe; border-color: rgba(99,102,241,0.3); }
+
+  /* ==========================================================
+     Filter bar
+     ========================================================== */
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding: 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    align-items: center;
+  }
+  .filter-bar input, .filter-bar select {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--surface);
+    color: var(--text);
+    transition: all var(--t-fast) var(--ease-out);
+  }
+  .filter-bar input { flex: 1; min-width: 200px; }
+  .filter-bar input::placeholder { color: var(--text-subtle); }
+  .filter-bar input:focus, .filter-bar select:focus {
+    outline: none;
+    border-color: var(--brand-500);
+    box-shadow: var(--shadow-glow);
+  }
+  .filter-bar .btn-clear {
+    padding: 9px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: inherit;
+    transition: all var(--t-fast) var(--ease-out);
+  }
+  .filter-bar .btn-clear:hover { background: var(--surface-3); color: var(--text); }
+
+  .toggle-bar {
+    display: inline-flex;
+    gap: 2px;
+    background: var(--surface-3);
+    padding: 3px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+  }
+  .toggle-bar button {
+    padding: 6px 14px;
+    border: none;
+    background: transparent;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--text-muted);
+    transition: all var(--t-fast) var(--ease-out);
+  }
+  .toggle-bar button:hover { color: var(--text); }
+  .toggle-bar button.active {
+    background: var(--surface);
+    color: var(--brand-700);
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+  }
+  [data-theme="dark"] .toggle-bar button.active { color: var(--brand-300); }
+
+  .row-count {
+    color: var(--text-subtle);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ==========================================================
+     Table
+     ========================================================== */
+  .table-wrap {
+    max-height: 680px;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--surface);
+  }
+  .table-wrap::-webkit-scrollbar { width: 10px; height: 10px; }
+  .table-wrap::-webkit-scrollbar-track { background: var(--surface-2); }
+  .table-wrap::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 5px; }
+  .table-wrap::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead { position: sticky; top: 0; background: var(--surface-2); z-index: 1; }
+  th, td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+  }
+  th {
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    font-size: 12.5px;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    transition: background var(--t-fast) var(--ease-out);
+  }
+  th:hover { background: var(--surface-3); color: var(--text); }
+  th.sorted { color: var(--brand-700); }
+  [data-theme="dark"] th.sorted { color: var(--brand-300); }
+  th.sorted::after { content: ' ▾'; }
+  th.sorted.asc::after { content: ' ▴'; }
+  tbody tr { transition: background var(--t-fast) var(--ease-out); }
+  tbody tr:hover { background: var(--surface-2); }
+  td b { color: var(--text); font-weight: 600; }
+
+  /* ==========================================================
+     Tags
+     ========================================================== */
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--r-full);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .tag-閩 { background: var(--brand-100); color: var(--brand-800); }
+  .tag-客 { background: #fef3c7; color: #92400e; }
+  .tag-族 { background: #fee2e2; color: #991b1b; }
+  .tag-新 { background: #d1fae5; color: #065f46; }
+  .tag-手 { background: #f3e8ff; color: #6b21a8; }
+  .tag-other { background: var(--surface-3); color: var(--text-muted); }
+  [data-theme="dark"] .tag-閩 { background: rgba(99,102,241,0.2); color: var(--brand-200); }
+  [data-theme="dark"] .tag-客 { background: rgba(245,158,11,0.2); color: #fcd34d; }
+  [data-theme="dark"] .tag-族 { background: rgba(239,68,68,0.2); color: #fca5a5; }
+  [data-theme="dark"] .tag-新 { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+  [data-theme="dark"] .tag-手 { background: rgba(168,85,247,0.2); color: #d8b4fe; }
+
+  .tag-change {
+    background: var(--success-bg);
+    color: var(--success-dark);
+    padding: 3px 10px;
+    font-size: 11.5px;
+    border-radius: var(--r-full);
+    font-weight: 600;
+  }
+  .tag-nochange {
+    background: var(--surface-3);
+    color: var(--text-subtle);
+    padding: 3px 10px;
+    font-size: 11.5px;
+    border-radius: var(--r-full);
+  }
+  .tag-missing {
+    background: var(--danger-bg);
+    color: var(--danger-dark);
+    padding: 3px 10px;
+    font-size: 11.5px;
+    border-radius: var(--r-full);
+    font-weight: 600;
+  }
+  .tag-fuzzy {
+    background: var(--warning-bg);
+    color: var(--warning-dark);
+    padding: 3px 10px;
+    font-size: 11.5px;
+    border-radius: var(--r-full);
+    font-weight: 600;
+  }
+  .tag-ambiguous {
+    background: #fce7f3;
+    color: #9f1239;
+    padding: 3px 10px;
+    font-size: 11.5px;
+    border-radius: var(--r-full);
+    font-weight: 600;
+  }
+  [data-theme="dark"] .tag-change { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+  [data-theme="dark"] .tag-missing { background: rgba(239,68,68,0.2); color: #fca5a5; }
+  [data-theme="dark"] .tag-fuzzy { background: rgba(245,158,11,0.2); color: #fcd34d; }
+  [data-theme="dark"] .tag-ambiguous { background: rgba(236,72,153,0.2); color: #fbcfe8; }
+
+  .fuzzy-row { background: var(--warning-tint) !important; }
+  .ambiguous-row { background: #fdf2f8 !important; }
+  .unmatched-row { background: var(--danger-tint) !important; }
+  [data-theme="dark"] .fuzzy-row { background: rgba(245,158,11,0.06) !important; }
+  [data-theme="dark"] .ambiguous-row { background: rgba(236,72,153,0.06) !important; }
+  [data-theme="dark"] .unmatched-row { background: rgba(239,68,68,0.06) !important; }
+  .changed-highlight {
+    background: linear-gradient(180deg, transparent 60%, var(--warning-bg) 60%);
+    font-weight: 700;
+    padding: 0 2px;
+  }
+  [data-theme="dark"] .changed-highlight { background: linear-gradient(180deg, transparent 60%, rgba(245,158,11,0.3) 60%); }
+
+  /* Grouped view */
+  .group-block {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .group-block h3 {
+    margin: 0 0 12px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .group-block h3 small { font-weight: 400; color: var(--text-subtle); font-size: 13px; }
+  .group-lang {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--surface-2);
+    border-radius: var(--r-sm);
+  }
+  .group-lang-head {
+    margin: 0 0 8px;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .group-lang table { background: transparent; }
+  .group-lang th, .group-lang td { padding: 8px 10px; font-size: 13px; }
+
+  /* ==========================================================
+     Empty state
+     ========================================================== */
+  .empty {
+    padding: 64px 20px;
+    text-align: center;
+    color: var(--text-subtle);
+    font-size: 14px;
+  }
+
+  /* ==========================================================
+     Entrance animations
+     ========================================================== */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero, .steps, details.help, #resultsSection {
+    animation: fadeInUp var(--t-slow) var(--ease-out) both;
+  }
+  .steps { animation-delay: 60ms; }
+  details.help { animation-delay: 120ms; }
+  #resultsSection { animation-delay: 40ms; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* ==========================================================
+     Responsive
+     ========================================================== */
+  @media (max-width: 640px) {
+    .hero { padding: 24px 12px 32px; }
+    .topnav-brand span:not(.logo) { display: none; }
+    .results-header h2 { font-size: 18px; }
+    .results-header { flex-direction: column; align-items: flex-start; }
+    .export-actions { width: 100%; }
+    .export-actions .btn { flex: 1; }
+    .filter-bar input { min-width: 100%; }
+    th, td { padding: 8px 10px; font-size: 12.5px; }
+  }
+
+  /* Scroll margin for sticky nav */
+  #resultsSection { scroll-margin-top: 80px; }
+
+  /* ==========================================================
+     Toast notifications
+     ========================================================== */
+  .toast-container {
+    position: fixed;
+    top: 76px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 200;
+    max-width: calc(100vw - 40px);
+    pointer-events: none;
+  }
+  .toast {
+    min-width: 260px;
+    max-width: 380px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left-width: 4px;
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-lg);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+    pointer-events: auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    animation: toastIn 0.3s var(--ease-out);
+  }
+  .toast.leaving { animation: toastOut 0.3s var(--ease-out) forwards; }
+  .toast-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .toast-body { flex: 1; word-break: break-word; }
+  .toast-close {
+    background: transparent;
+    border: none;
+    color: var(--text-subtle);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+    line-height: 1;
+    margin-top: 2px;
+    transition: color var(--t-fast);
+  }
+  .toast-close:hover { color: var(--text); }
+  .toast--success { border-left-color: var(--success); }
+  .toast--error   { border-left-color: var(--danger); }
+  .toast--warning { border-left-color: var(--warning); }
+  .toast--info    { border-left-color: var(--brand-500); }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes toastOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(30px); }
+  }
+
+  /* ==========================================================
+     Modal (overlay)
+     ========================================================== */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: grid;
+    place-items: center;
+    z-index: 300;
+    padding: 20px;
+    animation: fadeIn 0.2s var(--ease-out);
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: 24px;
+    max-width: 560px;
+    width: 100%;
+    max-height: 85vh;
+    overflow: auto;
+    box-shadow: var(--shadow-xl);
+    animation: modalIn 0.3s var(--ease-spring);
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .modal-title {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .modal-sub {
+    margin: 0 0 18px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .modal-sub code {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .candidate-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .candidate-list li {
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all var(--t-fast) var(--ease-out);
+    background: var(--surface-2);
+  }
+  .candidate-list li:hover {
+    background: var(--brand-50);
+    border-color: var(--brand-400);
+    transform: translateX(2px);
+  }
+  [data-theme="dark"] .candidate-list li:hover {
+    background: rgba(99,102,241,0.12);
+    border-color: var(--brand-500);
+  }
+  .candidate-list li .name {
+    font-weight: 700;
+    color: var(--text);
+    flex: 1;
+  }
+  .candidate-list li .meta {
+    color: var(--text-subtle);
+    font-size: 13px;
+  }
+  .candidate-list li.reject {
+    background: var(--danger-tint);
+    color: var(--danger-dark);
+    border-color: var(--danger-bg);
+    font-weight: 600;
+  }
+  [data-theme="dark"] .candidate-list li.reject {
+    background: rgba(239,68,68,0.08);
+    color: #fca5a5;
+    border-color: rgba(239,68,68,0.3);
+  }
+  .candidate-list li.reject:hover { background: var(--danger-bg); }
+  [data-theme="dark"] .candidate-list li.reject:hover { background: rgba(239,68,68,0.15); }
+
+  /* ==========================================================
+     Summary report
+     ========================================================== */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .summary-stat {
+    padding: 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    text-align: center;
+  }
+  .summary-stat .num {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--brand-700);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  [data-theme="dark"] .summary-stat .num { color: var(--brand-300); }
+  .summary-stat .lbl {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .summary-stat.success .num { color: var(--success-dark); }
+  .summary-stat.warning .num { color: var(--warning-dark); }
+  .summary-stat.danger  .num { color: var(--danger-dark); }
+  [data-theme="dark"] .summary-stat.success .num { color: #6ee7b7; }
+  [data-theme="dark"] .summary-stat.warning .num { color: #fcd34d; }
+  [data-theme="dark"] .summary-stat.danger  .num { color: #fca5a5; }
+
+  .summary-section { margin-top: 18px; }
+  .summary-section h4 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .summary-table th, .summary-table td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .summary-table th { font-weight: 600; color: var(--text-muted); font-size: 12px; }
+  .summary-table .delta-up { color: var(--success-dark); font-weight: 600; }
+  .summary-table .delta-down { color: var(--danger-dark); font-weight: 600; }
+  [data-theme="dark"] .summary-table .delta-up { color: #6ee7b7; }
+  [data-theme="dark"] .summary-table .delta-down { color: #fca5a5; }
+
+  /* ==========================================================
+     Keyboard shortcut hint
+     ========================================================== */
+  kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text);
+    box-shadow: 0 1px 0 var(--border-strong);
+    line-height: 1;
+  }
+  .shortcut-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 14px;
+  }
+  .shortcut-row:last-child { border-bottom: none; }
+  .shortcut-row .keys { display: flex; gap: 4px; align-items: center; }
+  .shortcut-row .desc { color: var(--text-muted); }
+
+  /* ==========================================================
+     Print mode
+     ========================================================== */
+  @media print {
+    /* Hide UI chrome */
+    .topnav, .hero, .stepper, .steps, details.help,
+    .filter-bar, .export-actions, .toggle-bar, #alertArea,
+    .dropzone, .toast-container, .modal-backdrop,
+    .results-header .btn, .results-header .export-actions { display: none !important; }
+
+    body {
+      background: white !important;
+      color: black !important;
+    }
+    .container { padding: 0 !important; max-width: none !important; }
+    .card, .results-card {
+      box-shadow: none !important;
+      border: 1px solid #888 !important;
+      border-radius: 0 !important;
+      padding: 12pt !important;
+      background: white !important;
+    }
+    .card::before { display: none !important; }
+    .results-header {
+      border-bottom: 2px solid black !important;
+      padding-bottom: 8pt !important;
+      margin-bottom: 12pt !important;
+    }
+    .results-header h2 { color: black !important; }
+    .results-header h2 .badge {
+      background: transparent !important;
+      color: black !important;
+      border: 1px solid black;
+    }
+    /* Grouped view layout for printing */
+    .group-block {
+      padding: 0 !important;
+      border: none !important;
+      margin-bottom: 16pt !important;
+      page-break-inside: avoid;
+    }
+    .group-block + .group-block { page-break-before: always; }
+    .group-block h3 { color: black !important; font-size: 16pt !important; }
+    .group-lang { background: transparent !important; padding: 0 !important; margin-bottom: 10pt !important; }
+    .group-lang-head { color: black !important; font-size: 12pt !important; }
+    table { font-size: 10.5pt !important; }
+    thead { background: #eee !important; }
+    th, td { padding: 5pt 8pt !important; border: 1px solid #888 !important; color: black !important; }
+    .tag { border: 1px solid #666 !important; background: transparent !important; color: black !important; font-weight: 600; }
+    .tag-missing, .tag-fuzzy, .tag-ambiguous { border-width: 2px !important; }
+    .unmatched-row, .fuzzy-row, .ambiguous-row { background: transparent !important; }
+    .changed-highlight { background: transparent !important; text-decoration: underline; font-weight: 700; }
+
+    /* Add a print header */
+    #resultsSection::before {
+      content: '本土語分班配對結果';
+      display: block;
+      font-size: 20pt;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 8pt;
+      color: black;
+    }
+    @page { margin: 1.5cm; }
+  }
+</style>
+</head>
+<body>
+<!-- Top navigation -->
+<nav class="topnav">
+  <div class="topnav-brand">
+    <span class="logo">本</span>
+    <span>本土語分班配對系統</span>
+  </div>
+  <div class="topnav-actions">
+    <button class="icon-btn" id="shortcutsBtn" title="鍵盤快捷鍵 (?)" aria-label="快捷鍵">⌨️</button>
+    <button class="icon-btn" id="helpToggle" title="使用說明" aria-label="使用說明">❓</button>
+    <button class="icon-btn" id="resetBtn" title="清除所有資料重新開始" aria-label="重置">🔄</button>
+    <button class="theme-toggle" id="themeToggle" title="切換深色/淺色模式 (Ctrl+D)" aria-label="切換深色/淺色模式">🌙</button>
+  </div>
+</nav>
+
+<!-- Toast notifications container -->
+<div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<div class="container">
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-eyebrow">
+      <span class="dot"></span>
+      <span>100% 本機運算・資料不上雲</span>
+    </div>
+    <h1>上傳、比對、匯出<br/>分班更新 <span class="accent">一氣呵成</span></h1>
+    <p class="hero-sub">
+      升級重新分班後,用姓名自動配對舊本土語選修名單,即時產出更新版的班級/座號對照表與新名單。
+    </p>
+    <div class="hero-highlights">
+      <span class="hero-highlight"><span class="ico">⚡</span>秒級配對 119+ 學生</span>
+      <span class="hero-highlight"><span class="ico">🎯</span>錯字自動模糊比對</span>
+      <span class="hero-highlight"><span class="ico">🔒</span>資料不離開瀏覽器</span>
+      <span class="hero-highlight"><span class="ico">📦</span>單檔 HTML 可離線</span>
+    </div>
+  </section>
+
+  <!-- Progress stepper -->
+  <div class="stepper" id="stepper">
+    <div class="stepper-item" data-step="1" id="step1">
+      <span class="step-dot">1</span><span>上傳舊名單</span>
+    </div>
+    <div class="stepper-connector" id="connector12"></div>
+    <div class="stepper-item" data-step="2" id="step2">
+      <span class="step-dot">2</span><span>上傳新編班</span>
+    </div>
+    <div class="stepper-connector" id="connector23"></div>
+    <div class="stepper-item" data-step="3" id="step3">
+      <span class="step-dot">3</span><span>核對與匯出</span>
+    </div>
+  </div>
+
+  <!-- Step cards -->
+  <div class="steps">
+    <!-- Step 1: Old Native Language List -->
+    <div class="card step-card" id="card1">
+      <h2><span class="step-num">1</span>上傳舊本土語名單 <small>升級前</small></h2>
+      <p class="hint">
+        目前 2→3 或 4→5 年級的本土語選修名單 Excel 檔。
+        <b>可一次選取多個檔案</b>(例如同時處理三年級與五年級,結果自動合併)。
+      </p>
+      <label class="dropzone" id="oldZone">
+        <input type="file" id="oldFile" accept=".xlsx,.xls" multiple />
+        <span class="dropzone-icon" id="oldIcon">📋</span>
+        <div class="dropzone-text" id="oldText">點擊或拖曳上傳</div>
+        <div class="dropzone-hint">支援 .xlsx / .xls・可多選</div>
+        <div class="dropzone-file" id="oldFileName"></div>
+      </label>
+      <div class="stats" id="oldStats"></div>
+    </div>
+
+    <!-- Step 2: New Class Roster -->
+    <div class="card step-card" id="card2">
+      <h2><span class="step-num">2</span>上傳新編班名冊 <small>升級後</small></h2>
+      <p class="hint">
+        升級後的新班級名冊,需包含欄位:<b>姓名、新班級、新座號</b>。
+        欄位名稱可為「班級/新班級/班別」等變體,系統自動偵測。
+      </p>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" id="downloadTemplate">📥 下載新名冊範本</button>
+        <span style="color:var(--text-subtle);font-size:12px">沒有範本?先下載這個來參考格式</span>
+      </div>
+      <label class="dropzone" id="newZone">
+        <input type="file" id="newFile" accept=".xlsx,.xls" multiple />
+        <span class="dropzone-icon" id="newIcon">📝</span>
+        <div class="dropzone-text" id="newText">點擊或拖曳上傳</div>
+        <div class="dropzone-hint">支援 .xlsx / .xls・可多選</div>
+        <div class="dropzone-file" id="newFileName"></div>
+      </label>
+      <div class="stats" id="newStats"></div>
+    </div>
+  </div>
+
+  <details class="help">
+    <summary>📖 格式與進階功能說明</summary>
+    <div class="help-body">
+
+      <!-- Section 1: 新名冊欄位需求 -->
+      <div class="help-section">
+        <h3 class="help-section-title">
+          <span class="ico">📋</span>新名冊欄位需求
+        </h3>
+        <p class="help-section-sub">
+          新編班名冊只需要這 <b>3 個必要欄位</b>,多個工作表也會自動合併處理。欄位名稱寬鬆偵測,不必強求命名。
+        </p>
+
+        <table class="sample-table">
+          <thead>
+            <tr>
+              <th>姓名</th>
+              <th>新班級</th>
+              <th>新座號</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="required">王小明</td><td class="required">3年2班</td><td class="required">15</td></tr>
+            <tr><td class="required">陳美玲</td><td class="required">3年1班</td><td class="required">8</td></tr>
+            <tr><td class="required">李大華</td><td class="required">3年3班</td><td class="required">22</td></tr>
+          </tbody>
+        </table>
+
+        <div class="field-aliases">
+          <div class="field-alias">
+            <div class="field-alias-label">👤 姓名欄</div>
+            <div class="field-alias-values">
+              <span class="code-chip">姓名</span>
+              <span class="code-chip">學生姓名</span>
+            </div>
+          </div>
+          <div class="field-alias">
+            <div class="field-alias-label">🏫 班級欄</div>
+            <div class="field-alias-values">
+              <span class="code-chip">新班級</span>
+              <span class="code-chip">班級</span>
+              <span class="code-chip">班別</span>
+            </div>
+          </div>
+          <div class="field-alias">
+            <div class="field-alias-label">#️⃣ 座號欄</div>
+            <div class="field-alias-values">
+              <span class="code-chip">新座號</span>
+              <span class="code-chip">座號</span>
+              <span class="code-chip">號碼</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: 進階功能 -->
+      <div class="help-section">
+        <h3 class="help-section-title">
+          <span class="ico">⚡</span>進階功能
+        </h3>
+        <p class="help-section-sub">
+          系統內建 6 項智慧處理能力,處理實務上最常見的資料狀況。
+        </p>
+
+        <div class="feat-grid">
+          <div class="feat-card feat-card--info">
+            <div class="feat-card-title"><span class="ico">📚</span>多檔同時上傳</div>
+            <p class="feat-card-desc">
+              Step 1 / Step 2 都支援一次選多個檔案,例如三年級與五年級同時處理,系統自動累計合併。
+            </p>
+          </div>
+
+          <div class="feat-card feat-card--fuzzy">
+            <div class="feat-card-title"><span class="ico">🟡</span>疑似配對</div>
+            <p class="feat-card-desc">
+              舊名單與新名冊姓名有 <b>1 字差異</b>且同長度、唯一候選時,自動配對並標記「疑似」。例如打字錯誤 <code>翊→翌</code>。
+            </p>
+          </div>
+
+          <div class="feat-card feat-card--ambiguous">
+            <div class="feat-card-title"><span class="ico">🟠</span>多候選確認</div>
+            <p class="feat-card-desc">
+              若 1 字差異的候選超過 1 位,<b>不會自動配對</b>,會列於警示區讓您手動選擇正確對象。
+            </p>
+          </div>
+
+          <div class="feat-card feat-card--unmatched">
+            <div class="feat-card-title"><span class="ico">🔴</span>完全未配對</div>
+            <p class="feat-card-desc">
+              新名冊中連 1 字差異都找不到的學生會另列警示,可能是轉學生或姓名大幅改動,需人工處理。
+            </p>
+          </div>
+
+          <div class="feat-card feat-card--success">
+            <div class="feat-card-title"><span class="ico">🌿</span>族別資訊保留</div>
+            <p class="feat-card-desc">
+              匯出檔保留姓名括號內的族別 / 新住民國別(如 <code>葉帥廷(阿美)</code>),另有獨立「族別」欄位便於後續統計。
+            </p>
+          </div>
+
+          <div class="feat-card feat-card--neutral">
+            <div class="feat-card-title"><span class="ico">🔒</span>純本機運算</div>
+            <p class="feat-card-desc">
+              所有解析、比對、匯出都在您的瀏覽器內完成,學生資料<b>永遠不會上傳</b>到任何伺服器。
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- Results Section -->
+  <div id="resultsSection" style="display:none;">
+    <div class="card results-card">
+      <div class="results-header">
+        <h2>📊 配對結果</h2>
+        <div class="export-actions">
+          <button class="btn btn-ghost btn-sm" id="reportBtn" title="產生變動摘要報告">📋 摘要報告</button>
+          <button class="btn btn-ghost btn-sm" id="printBtn" title="列印目前檢視 (分班檢視效果較好)">🖨️ 列印</button>
+          <button class="btn btn-ghost" id="exportFlatBtn" title="Ctrl+E">匯出平面表</button>
+          <button class="btn btn-success" id="exportMatrixBtn" title="Ctrl+Shift+E">匯出新名單</button>
+        </div>
+      </div>
+
+      <div id="alertArea"></div>
+
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="🔍 搜尋姓名、班級、語別..." />
+        <select id="filterClass"><option value="">全部班級</option></select>
+        <select id="filterLang"><option value="">全部語別</option></select>
+        <select id="filterStatus">
+          <option value="">全部狀態</option>
+          <option value="exact">✅ 精確配對</option>
+          <option value="fuzzy">🟡 疑似配對(1 字差異)</option>
+          <option value="ambiguous">🟠 多候選待確認</option>
+          <option value="unmatched">🔴 完全未配對</option>
+          <option value="matched">已配對(精確+疑似)</option>
+          <option value="changed">班級有異動</option>
+          <option value="same">班級未變</option>
+        </select>
+        <div class="toggle-bar">
+          <button class="active" data-view="flat">清單檢視</button>
+          <button data-view="grouped">分班檢視</button>
+        </div>
+        <button class="btn-clear" id="clearFilters">清除篩選</button>
+      </div>
+
+      <div id="rowCountBar" class="row-count" style="margin-bottom:8px;"></div>
+      <div class="table-wrap" id="tableWrap"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// Global State
+// ============================================================
+const state = {
+  oldStudents: [],     // {name, oldClass, oldSeat, language, teacher, classroom}
+  newRoster: [],       // {name, newClass, newSeat}
+  newRosterMap: null,  // Map<name, {newClass, newSeat}>
+  merged: [],          // all merged records
+  sortKey: 'newClass',
+  sortAsc: true,
+  viewMode: 'flat'
+};
+
+// ============================================================
+// Utility
+// ============================================================
+const $ = id => document.getElementById(id);
+
+// Toast notifications — replaces alert()
+const TOAST_ICONS = { info: 'ℹ️', success: '✅', warning: '⚠️', error: '❌' };
+function toast(msg, type = 'info', duration = 4500) {
+  const container = $('toastContainer');
+  if (!container) { console[type === 'error' ? 'error' : 'log'](msg); return; }
+  const el = document.createElement('div');
+  el.className = `toast toast--${type}`;
+  el.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  el.innerHTML = `
+    <span class="toast-icon">${TOAST_ICONS[type] || 'ℹ️'}</span>
+    <div class="toast-body"></div>
+    <button class="toast-close" aria-label="關閉">✕</button>`;
+  el.querySelector('.toast-body').textContent = msg;
+  container.appendChild(el);
+  const close = () => {
+    el.classList.add('leaving');
+    setTimeout(() => el.remove(), 300);
+  };
+  el.querySelector('.toast-close').addEventListener('click', close);
+  if (duration > 0) setTimeout(close, duration);
+  return el;
+}
+
+// Modal helper
+function openModal(contentHtml) {
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `<div class="modal-card">${contentHtml}</div>`;
+  document.body.appendChild(backdrop);
+  const close = () => backdrop.remove();
+  backdrop.addEventListener('click', e => { if (e.target === backdrop) close(); });
+  document.addEventListener('keydown', function onEsc(e) {
+    if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onEsc); }
+  });
+  return { backdrop, card: backdrop.querySelector('.modal-card'), close };
+}
+
+function normalizeName(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/\s+/g, '')
+    .replace(/[　]/g, '')
+    .trim();
+}
+
+function normalizeClass(s) {
+  if (s == null) return '';
+  let v = String(s).replace(/\s+/g, '').trim();
+  v = v.replace(/[０-９]/g, d => String.fromCharCode(d.charCodeAt(0) - 0xFEE0));
+  const m = v.match(/(\d+)\s*年\s*(\d+)\s*班/);
+  if (m) return `${m[1]}年${m[2]}班`;
+  const m2 = v.match(/^(\d+)[-_ ](\d+)$/);
+  if (m2) return `${m2[1]}年${m2[2]}班`;
+  return v;
+}
+
+function normalizeSeat(s) {
+  if (s == null || s === '') return '';
+  const v = String(s).replace(/\s+/g, '').replace(/[０-９]/g, d => String.fromCharCode(d.charCodeAt(0) - 0xFEE0));
+  return v;
+}
+
+function languageCategory(langRaw) {
+  const s = String(langRaw || '');
+  if (s.includes('閩')) return '閩語';
+  if (s.includes('客')) return '客語';
+  if (s.includes('族')) return '族語';
+  if (s.includes('新住民') || s.includes('越南') || s.includes('泰語') || s.includes('印尼') || s.includes('柬埔寨')) return '新住民語';
+  if (s.includes('手語')) return '手語';
+  return '其他';
+}
+
+function langTagClass(lang) {
+  if (!lang) return 'tag-other';
+  if (lang.includes('閩')) return 'tag-閩';
+  if (lang.includes('客')) return 'tag-客';
+  if (lang.includes('族')) return 'tag-族';
+  if (lang.includes('新住民')) return 'tag-新';
+  if (lang.includes('手語')) return 'tag-手';
+  return 'tag-other';
+}
+
+function levenshtein(a, b) {
+  if (a === b) return 0;
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1]
+        : Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]) + 1;
+    }
+  }
+  return dp[m][n];
+}
+
+// ============================================================
+// Old Native Language List Parser (matrix format)
+// ============================================================
+function parseOldWorkbook(wb) {
+  const out = [];
+  for (const sheetName of wb.SheetNames) {
+    const ws = wb.Sheets[sheetName];
+    const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+    parseOldSheet(grid, out);
+  }
+  return out;
+}
+
+function looksLikeClassroom(s) {
+  return /(教室|課照|C\d{2,}|研習|智慧|美勞|電腦|自然|音樂|校史|魚寶屋|上課|學習中心)/.test(s);
+}
+
+function parseOldSheet(grid, out) {
+  // Step 1: Find all "班級：" anchors
+  const classAnchors = [];
+  for (let r = 0; r < grid.length; r++) {
+    const row = grid[r] || [];
+    for (let c = 0; c < row.length; c++) {
+      const cell = String(row[c] || '').trim();
+      if (/^班級\s*[：:]/.test(cell)) {
+        const className = normalizeClass(row[c + 1] || '');
+        let teacher = '';
+        for (let k = 2; k < 5; k++) {
+          const v = String(row[c + k] || '').trim();
+          if (/^(教師|導師)\s*[：:]/.test(v)) {
+            teacher = String(row[c + k + 1] || '').trim();
+            break;
+          }
+        }
+        if (className) classAnchors.push({ classRow: r, classCol: c, className, teacher });
+      }
+    }
+  }
+  if (classAnchors.length === 0) return;
+
+  // Step 2: For each anchor, find langRow, headerRow, bianhaoCol
+  for (const a of classAnchors) {
+    // Find langRow (contains 語別：) near classRow
+    let langRow = -1;
+    for (let r = a.classRow + 1; r < Math.min(a.classRow + 8, grid.length); r++) {
+      const rowArr = grid[r] || [];
+      const nearStart = Math.max(0, a.classCol - 5);
+      const nearEnd = a.classCol + 8;
+      for (let c = nearStart; c < nearEnd && c < rowArr.length; c++) {
+        if (/^語別\s*[：:]/.test(String(rowArr[c] || '').trim())) { langRow = r; break; }
+      }
+      if (langRow !== -1) break;
+    }
+    a.langRow = langRow;
+
+    // Find 編號 col (scan within ±5 cols of classCol)
+    let headerRow = -1, bianhaoCol = -1;
+    if (langRow !== -1) {
+      for (let r = langRow + 1; r < Math.min(langRow + 6, grid.length); r++) {
+        const rowArr = grid[r] || [];
+        const nearStart = Math.max(0, a.classCol - 5);
+        const nearEnd = a.classCol + 8;
+        for (let c = nearStart; c < nearEnd && c < rowArr.length; c++) {
+          if (String(rowArr[c] || '').trim() === '編號') {
+            headerRow = r; bianhaoCol = c; break;
+          }
+        }
+        if (headerRow !== -1) break;
+      }
+    }
+    a.headerRow = headerRow;
+    a.bianhaoCol = bianhaoCol;
+  }
+
+  // Filter out anchors without valid structure
+  const validClasses = classAnchors.filter(a => a.bianhaoCol !== -1 && a.headerRow !== -1 && a.langRow !== -1);
+  if (validClasses.length === 0) return;
+
+  // Step 3: Sort by (classRow, bianhaoCol) and compute colEnd per class
+  validClasses.sort((a, b) => a.classRow - b.classRow || a.bianhaoCol - b.bianhaoCol);
+  const rowGroups = {};
+  for (const c of validClasses) {
+    rowGroups[c.classRow] = rowGroups[c.classRow] || [];
+    rowGroups[c.classRow].push(c);
+  }
+  for (const cls of validClasses) {
+    const peers = rowGroups[cls.classRow];
+    const idx = peers.indexOf(cls);
+    const next = peers[idx + 1];
+    // colEnd = next class's bianhaoCol (exclusive), guarantees no overlap
+    cls.colEnd = next ? next.bianhaoCol : (grid[cls.classRow] ? Math.max(grid[cls.classRow].length + 2, cls.bianhaoCol + 12) : cls.bianhaoCol + 12);
+  }
+
+  // Step 4: For each class, detect pairs + extract students
+  for (const cls of validClasses) {
+    const { bianhaoCol, headerRow, langRow, colEnd, classCol } = cls;
+
+    // Language columns within [bianhaoCol, colEnd)
+    const langCols = [];
+    const langRowArr = grid[langRow] || [];
+    for (let c = bianhaoCol; c < colEnd; c++) {
+      const cell = String(langRowArr[c] || '').trim();
+      if (/^語別\s*[：:]/.test(cell)) {
+        const contentCol = c + 1;
+        const content = String(langRowArr[contentCol] || '').trim();
+        let extraContent = '';
+        for (let k = 2; k <= 4 && c + k < colEnd; k++) {
+          const v = String(langRowArr[c + k] || '').trim();
+          if (/^語別\s*[：:]/.test(v)) break;
+          if (v) extraContent += v;
+        }
+        const langs = extractLanguages(content + extraContent);
+        langCols.push({ labelCol: c, contentCol, language: langs.display, raw: content + extraContent });
+      }
+    }
+    if (langCols.length === 0) continue;
+
+    // Detect pairs data-drivenly: numeric seat + CJK name within [bianhaoCol, colEnd)
+    const pairSet = new Set();
+    const pairs = [];
+    for (let r = headerRow; r < Math.min(grid.length, headerRow + 30); r++) {
+      const row = grid[r] || [];
+      const joined = row.slice(bianhaoCol, colEnd).map(x => String(x || '')).join('');
+      if (joined.includes('總人數')) break;
+      let c = bianhaoCol + 1;
+      while (c < colEnd - 1) {
+        const seatVal = String(row[c] || '').trim();
+        const nameVal = String(row[c + 1] || '').trim();
+        const seatNum = normalizeSeat(seatVal);
+        const isSeat = /^\d{1,3}$/.test(seatNum);
+        const isName = /[\u4e00-\u9fff]/.test(nameVal) && !looksLikeClassroom(nameVal) && nameVal !== '姓名';
+        if (isSeat && isName) {
+          const key = `${c}-${c + 1}`;
+          if (!pairSet.has(key)) {
+            pairSet.add(key);
+            pairs.push({ seatCol: c, nameCol: c + 1 });
+          }
+          c += 2;
+        } else {
+          c += 1;
+        }
+      }
+    }
+    if (pairs.length === 0) continue;
+    pairs.sort((a, b) => a.seatCol - b.seatCol);
+
+    // Assign each pair to closest language col
+    for (const p of pairs) {
+      let best = null, bestDist = Infinity;
+      for (const lc of langCols) {
+        const d = Math.min(Math.abs(lc.contentCol - p.seatCol), Math.abs(lc.contentCol - p.nameCol));
+        if (d < bestDist) { bestDist = d; best = lc; }
+      }
+      p.language = best ? best.language : '';
+    }
+
+    // Extract students
+    for (let r = headerRow; r < grid.length; r++) {
+      const row = grid[r] || [];
+      const joined = row.slice(bianhaoCol, colEnd).map(x => String(x || '')).join('');
+      if (joined.includes('總人數')) break;
+      for (const p of pairs) {
+        const seatRaw = String(row[p.seatCol] || '').trim();
+        const nameRaw = String(row[p.nameCol] || '').trim();
+        if (!nameRaw || !seatRaw) continue;
+        if (nameRaw === '姓名' || seatRaw === '座號') continue;
+        if (!/[\u4e00-\u9fff]/.test(nameRaw)) continue;
+        if (looksLikeClassroom(nameRaw)) continue;
+        const seat = normalizeSeat(seatRaw);
+        if (!/^\d{1,3}$/.test(seat)) continue;
+        const cleanName = nameRaw.replace(/\(.*?\)/g, '').trim();
+        const tribeInfo = (nameRaw.match(/\(([^)]+)\)/) || [])[1] || '';
+        let precisLang = p.language;
+        if (tribeInfo && /手語|台灣手語/.test(tribeInfo)) precisLang = '手語';
+        else if (tribeInfo && /阿美|泰雅|布農|排灣|賽德克|魯凱|卑南|鄒|太魯閣|撒奇萊雅|邵|噶瑪蘭|拉阿魯哇|卡那卡那富|雅美|達悟/.test(tribeInfo)) precisLang = '族語';
+        else if (tribeInfo && /越南|泰語|印尼|柬埔寨|緬甸|馬來西亞|菲律賓/.test(tribeInfo)) precisLang = '新住民語';
+        out.push({
+          name: cleanName,
+          rawName: nameRaw,
+          oldClass: cls.className,
+          oldSeat: seat,
+          teacher: cls.teacher,
+          language: precisLang || p.language,
+          tribe: tribeInfo
+        });
+      }
+    }
+  }
+}
+
+function extractLanguages(content) {
+  // content like "閩語8", "客語8", "族語2新住民1手語1"
+  const s = String(content);
+  const results = [];
+  const patterns = [
+    { re: /閩語\d*/, name: '閩語' },
+    { re: /客語\d*/, name: '客語' },
+    { re: /族語\d*/, name: '族語' },
+    { re: /新住民\d*/, name: '新住民語' },
+    { re: /手語\d*/, name: '手語' },
+    { re: /台灣手語\d*/, name: '台灣手語' }
+  ];
+  for (const p of patterns) {
+    if (p.re.test(s)) results.push(p.name);
+  }
+  return { display: results.join('/') || s.replace(/\d+/g, '').trim(), categories: results };
+}
+
+// ============================================================
+// New Class Roster Parser (flexible format)
+// ============================================================
+function parseNewRoster(wb) {
+  const result = [];
+  for (const sheetName of wb.SheetNames) {
+    const ws = wb.Sheets[sheetName];
+    const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+    if (!grid.length) continue;
+
+    // Try the SIMPLE format first: find a header row with "姓名" and "班級" and "座號"
+    const simple = trySimpleRoster(grid, sheetName);
+    if (simple.length) {
+      result.push(...simple);
+      continue;
+    }
+
+    // Try MATRIX format (same as old format) — new class lists might come in same matrix layout
+    const matrix = tryMatrixRoster(grid, sheetName);
+    if (matrix.length) {
+      result.push(...matrix);
+      continue;
+    }
+  }
+  return result;
+}
+
+function trySimpleRoster(grid, sheetName) {
+  const out = [];
+  // Find header row
+  let headerRow = -1;
+  let nameCol = -1, classCol = -1, seatCol = -1;
+  const classPatterns = [/新班級/, /^班級$/, /^班別$/, /班級$/];
+  const seatPatterns = [/新座號/, /^座號$/, /^號碼$/, /座號$/];
+  const namePatterns = [/學生姓名/, /^姓名$/, /姓名$/];
+
+  for (let r = 0; r < Math.min(grid.length, 30); r++) {
+    const row = grid[r] || [];
+    let nC = -1, cC = -1, sC = -1;
+    for (let c = 0; c < row.length; c++) {
+      const cell = String(row[c] || '').trim();
+      if (nC === -1 && namePatterns.some(p => p.test(cell))) nC = c;
+      if (cC === -1 && classPatterns.some(p => p.test(cell))) cC = c;
+      if (sC === -1 && seatPatterns.some(p => p.test(cell))) sC = c;
+    }
+    if (nC !== -1 && cC !== -1 && sC !== -1) {
+      headerRow = r; nameCol = nC; classCol = cC; seatCol = sC;
+      break;
+    }
+  }
+  if (headerRow === -1) return out;
+
+  for (let r = headerRow + 1; r < grid.length; r++) {
+    const row = grid[r] || [];
+    const name = String(row[nameCol] || '').trim();
+    const cls = String(row[classCol] || '').trim();
+    const seat = String(row[seatCol] || '').trim();
+    if (!name || !/[\u4e00-\u9fff]/.test(name)) continue;
+    out.push({
+      name: name.replace(/\(.*?\)/g, '').trim(),
+      rawName: name,
+      newClass: normalizeClass(cls),
+      newSeat: normalizeSeat(seat),
+      sheet: sheetName
+    });
+  }
+  return out;
+}
+
+function tryMatrixRoster(grid, sheetName) {
+  // Some roster files might list students class-by-class in matrix.
+  // Look for patterns: "X年X班" header followed by seat+name columns
+  const out = [];
+  const classMatches = [];
+  for (let r = 0; r < grid.length; r++) {
+    const row = grid[r] || [];
+    for (let c = 0; c < row.length; c++) {
+      const cell = String(row[c] || '').trim();
+      const cm = cell.match(/^(\d+年\d+班)$/);
+      if (cm) {
+        classMatches.push({ row: r, col: c, className: cm[1] });
+      }
+    }
+  }
+  if (classMatches.length === 0) return out;
+
+  // For each class, scan following rows for (座號, 姓名) pairs
+  for (const anchor of classMatches) {
+    const colStart = anchor.col;
+    // Find seat + name columns by scanning a few rows below
+    let seatCol = -1, nameCol = -1;
+    for (let r = anchor.row + 1; r < Math.min(anchor.row + 6, grid.length); r++) {
+      const row = grid[r] || [];
+      for (let c = Math.max(0, colStart - 2); c < colStart + 8 && c < row.length; c++) {
+        const cell = String(row[c] || '').trim();
+        if (seatCol === -1 && cell === '座號') seatCol = c;
+        if (nameCol === -1 && cell === '姓名') nameCol = c;
+      }
+      if (seatCol !== -1 && nameCol !== -1) {
+        for (let r2 = r + 1; r2 < grid.length; r2++) {
+          const rrow = grid[r2] || [];
+          const nameVal = String(rrow[nameCol] || '').trim();
+          const seatVal = String(rrow[seatCol] || '').trim();
+          if (!nameVal) break;
+          if (!/[\u4e00-\u9fff]/.test(nameVal)) break;
+          out.push({
+            name: nameVal.replace(/\(.*?\)/g, '').trim(),
+            rawName: nameVal,
+            newClass: anchor.className,
+            newSeat: normalizeSeat(seatVal),
+            sheet: sheetName
+          });
+        }
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+// ============================================================
+// Matching
+// ============================================================
+function doMatch() {
+  const map = new Map();
+  const dups = new Map();
+  for (const s of state.newRoster) {
+    const key = normalizeName(s.name);
+    if (!key) continue;
+    if (map.has(key)) dups.set(key, (dups.get(key) || 1) + 1);
+    map.set(key, s);
+  }
+  state.newRosterMap = map;
+  state.newRosterDups = dups;
+
+  // Pass 1: exact match
+  const usedKeys = new Set();
+  const results = state.oldStudents.map(o => {
+    const key = normalizeName(o.name);
+    const m = map.get(key);
+    if (m) {
+      usedKeys.add(key);
+      return {
+        ...o,
+        newClass: m.newClass,
+        newSeat: m.newSeat,
+        matched: true,
+        matchType: 'exact',
+        classChanged: o.oldClass !== m.newClass,
+        fuzzyCandidate: null,
+        fuzzyCandidates: null
+      };
+    }
+    return {
+      ...o, newClass: '', newSeat: '',
+      matched: false, matchType: 'unmatched',
+      classChanged: false, fuzzyCandidate: null, fuzzyCandidates: null
+    };
+  });
+
+  // Pass 2: fuzzy match for unmatched old students
+  // Only consider new-roster names NOT already taken by exact match
+  const availableNames = [...map.keys()].filter(k => !usedKeys.has(k));
+  for (const r of results) {
+    if (r.matched) continue;
+    const key = normalizeName(r.name);
+    if (!key || key.length < 2) continue;
+    const candidates = [];
+    for (const nk of availableNames) {
+      if (nk.length !== key.length) continue; // require same length (safer for Chinese)
+      if (levenshtein(key, nk) === 1) candidates.push(nk);
+    }
+    if (candidates.length === 1) {
+      const m = map.get(candidates[0]);
+      r.newClass = m.newClass;
+      r.newSeat = m.newSeat;
+      r.matched = true;
+      r.matchType = 'fuzzy';
+      r.classChanged = r.oldClass !== m.newClass;
+      r.fuzzyCandidate = m.name;
+      usedKeys.add(candidates[0]);
+    } else if (candidates.length > 1) {
+      r.matchType = 'ambiguous';
+      r.fuzzyCandidates = candidates.map(c => map.get(c)).slice(0, 5);
+    }
+  }
+
+  state.merged = results;
+}
+
+// ============================================================
+// UI Rendering
+// ============================================================
+function animateCountUp(el, target, duration = 700) {
+  const start = parseInt(el.textContent.replace(/,/g, '')) || 0;
+  if (start === target || duration === 0) { el.textContent = target; return; }
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    el.textContent = target; return;
+  }
+  const startTime = performance.now();
+  function tick(now) {
+    const t = Math.min(1, (now - startTime) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.round(start + (target - start) * eased);
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+function animateAllCountUps(root) {
+  (root || document).querySelectorAll('[data-countup]').forEach(el => {
+    animateCountUp(el, parseInt(el.dataset.countup) || 0);
+  });
+}
+const num = n => `<span data-countup="${n}">0</span>`;
+
+function renderStats() {
+  const oldStats = $('oldStats');
+  if (state.oldStudents.length) {
+    const classes = new Set(state.oldStudents.map(s => s.oldClass));
+    const langs = new Set(state.oldStudents.map(s => languageCategory(s.language)));
+    const gradeGroups = {};
+    for (const s of state.oldStudents) {
+      const g = (s.oldClass || '').match(/^(\d+)年/);
+      const grade = g ? `${g[1]}年級` : '其他';
+      gradeGroups[grade] = (gradeGroups[grade] || 0) + 1;
+    }
+    const gradeChips = Object.entries(gradeGroups).sort()
+      .map(([g, n]) => `<span class="stat-chip">${g} ${num(n)} 人</span>`).join('');
+    oldStats.innerHTML = `
+      <span class="stat-chip primary">${num(state.oldStudents.length)} 位學生</span>
+      <span class="stat-chip">${num(classes.size)} 個班級</span>
+      <span class="stat-chip">${num(langs.size)} 種語別</span>
+      ${gradeChips}
+    `;
+    animateAllCountUps(oldStats);
+  } else oldStats.innerHTML = '';
+
+  const newStats = $('newStats');
+  if (state.newRoster.length) {
+    const classes = new Set(state.newRoster.map(s => s.newClass));
+    const gradeGroups = {};
+    for (const s of state.newRoster) {
+      const g = (s.newClass || '').match(/^(\d+)年/);
+      const grade = g ? `${g[1]}年級` : '其他';
+      gradeGroups[grade] = (gradeGroups[grade] || 0) + 1;
+    }
+    const gradeChips = Object.entries(gradeGroups).sort()
+      .map(([g, n]) => `<span class="stat-chip">${g} ${num(n)} 人</span>`).join('');
+    newStats.innerHTML = `
+      <span class="stat-chip primary">${num(state.newRoster.length)} 位學生</span>
+      <span class="stat-chip">${num(classes.size)} 個班級</span>
+      ${gradeChips}
+    `;
+    animateAllCountUps(newStats);
+  } else newStats.innerHTML = '';
+}
+
+function renderAlerts() {
+  const area = $('alertArea');
+  area.innerHTML = '';
+
+  const fuzzy = state.merged.filter(s => s.matchType === 'fuzzy');
+  const ambiguous = state.merged.filter(s => s.matchType === 'ambiguous');
+  const unmatched = state.merged.filter(s => s.matchType === 'unmatched');
+
+  // Fuzzy matches alert (yellow) — let user verify
+  if (fuzzy.length) {
+    const items = fuzzy.slice(0, 10).map(s =>
+      `<code>${escapeHtml(s.rawName || s.name)}</code> → <code>${escapeHtml(s.fuzzyCandidate)}</code>`
+    ).join('、');
+    const div = document.createElement('div');
+    div.className = 'alert alert-warn';
+    div.innerHTML = `🟡 <b>${fuzzy.length} 筆疑似配對</b>(姓名有 1 字差異,已自動配對但請務必核對):${items}${fuzzy.length > 10 ? '...' : ''}`;
+    area.appendChild(div);
+  }
+
+  // Ambiguous alert (pink)
+  if (ambiguous.length) {
+    const items = ambiguous.slice(0, 8).map(s => {
+      const cands = (s.fuzzyCandidates || []).map(c => escapeHtml(c.name)).join('/');
+      return `<code>${escapeHtml(s.rawName || s.name)}</code> (候選:${cands})`;
+    }).join('、');
+    const div = document.createElement('div');
+    div.className = 'alert alert-warn';
+    div.innerHTML = `🟠 <b>${ambiguous.length} 筆多候選</b>(1 字差異的候選超過 1 位,需人工確認):${items}${ambiguous.length > 8 ? '...' : ''}`;
+    area.appendChild(div);
+  }
+
+  // Unmatched alert (orange)
+  if (unmatched.length) {
+    const names = [...new Set(unmatched.map(s => s.name))].slice(0, 15).join('、');
+    const div = document.createElement('div');
+    div.className = 'alert alert-warn';
+    div.innerHTML = `⚠️ <b>${unmatched.length} 筆完全未配對</b>(${new Set(unmatched.map(s => s.name)).size} 位學生在新名冊找不到):${names}${unmatched.length > 15 ? '...' : ''}`;
+    area.appendChild(div);
+  }
+
+  // Duplicate new roster
+  if (state.newRosterDups && state.newRosterDups.size) {
+    const names = [...state.newRosterDups.keys()].slice(0, 10).join('、');
+    const div = document.createElement('div');
+    div.className = 'alert alert-warn';
+    div.innerHTML = `⚠️ <b>新名冊中有重複姓名</b>(${state.newRosterDups.size} 位):${names}`;
+    area.appendChild(div);
+  }
+
+  // Extras (new students not in old list)
+  if (state.newRosterMap) {
+    const oldNames = new Set(state.oldStudents.map(s => normalizeName(s.name)));
+    const extras = state.newRoster.filter(s => !oldNames.has(normalizeName(s.name)));
+    if (extras.length) {
+      const div = document.createElement('div');
+      div.className = 'alert alert-info';
+      div.innerHTML = `ℹ️ 新名冊中有 <b>${extras.length} 位學生</b>不在舊本土語名單中(可能未選修本土語或轉入生)`;
+      area.appendChild(div);
+    }
+  }
+
+  // Summary
+  const totalMatched = state.merged.filter(s => s.matched).length;
+  const changed = state.merged.filter(s => s.matched && s.classChanged);
+  const successRate = (totalMatched / state.merged.length * 100).toFixed(1);
+  const div = document.createElement('div');
+  div.className = 'alert alert-info';
+  const exactCount = state.merged.filter(s => s.matchType === 'exact').length;
+  const fuzzyLabel = fuzzy.length ? ` (精確 ${exactCount} + 疑似 ${fuzzy.length})` : '';
+  div.innerHTML = `✅ <b>配對成功率 ${successRate}%</b>${fuzzyLabel}・班級異動 <b>${changed.length}</b> 筆`;
+  area.appendChild(div);
+}
+
+function populateFilters() {
+  const classSel = $('filterClass');
+  const langSel = $('filterLang');
+  const classes = new Set();
+  const langs = new Set();
+  for (const s of state.merged) {
+    if (s.newClass) classes.add(s.newClass);
+    if (s.oldClass) classes.add(s.oldClass);
+    if (s.language) langs.add(languageCategory(s.language));
+  }
+  const sortedClasses = [...classes].sort((a,b) => a.localeCompare(b, 'zh-Hant'));
+  const sortedLangs = [...langs].sort();
+  classSel.innerHTML = '<option value="">全部班級</option>' + sortedClasses.map(c => `<option value="${c}">${c}</option>`).join('');
+  langSel.innerHTML = '<option value="">全部語別</option>' + sortedLangs.map(l => `<option value="${l}">${l}</option>`).join('');
+}
+
+function getFiltered() {
+  const q = normalizeName($('searchInput').value);
+  const cls = $('filterClass').value;
+  const lang = $('filterLang').value;
+  const status = $('filterStatus').value;
+  return state.merged.filter(s => {
+    if (q && !normalizeName(s.name).includes(q) && !(s.oldClass || '').includes(q) && !(s.newClass || '').includes(q) && !(s.language || '').includes(q)) return false;
+    if (cls && s.newClass !== cls && s.oldClass !== cls) return false;
+    if (lang && languageCategory(s.language) !== lang) return false;
+    if (status === 'matched' && !s.matched) return false;
+    if (status === 'exact' && s.matchType !== 'exact') return false;
+    if (status === 'fuzzy' && s.matchType !== 'fuzzy') return false;
+    if (status === 'ambiguous' && s.matchType !== 'ambiguous') return false;
+    if (status === 'unmatched' && s.matchType !== 'unmatched') return false;
+    if (status === 'changed' && !(s.matched && s.classChanged)) return false;
+    if (status === 'same' && !(s.matched && !s.classChanged)) return false;
+    return true;
+  });
+}
+
+function renderTable() {
+  const rows = getFiltered();
+  // Sort
+  const k = state.sortKey;
+  const mul = state.sortAsc ? 1 : -1;
+  rows.sort((a, b) => {
+    const va = String(a[k] || '');
+    const vb = String(b[k] || '');
+    // numeric sort for seat
+    if (k === 'oldSeat' || k === 'newSeat') {
+      const na = parseInt(va) || 0;
+      const nb = parseInt(vb) || 0;
+      return (na - nb) * mul;
+    }
+    return va.localeCompare(vb, 'zh-Hant') * mul;
+  });
+
+  $('rowCountBar').textContent = `顯示 ${rows.length} 筆 / 總計 ${state.merged.length} 筆`;
+
+  if (state.viewMode === 'grouped') {
+    renderGroupedTable(rows);
+  } else {
+    renderFlatTable(rows);
+  }
+}
+
+function renderFlatTable(rows) {
+  const wrap = $('tableWrap');
+  if (!rows.length) {
+    wrap.innerHTML = '<div class="empty">沒有符合條件的資料</div>';
+    return;
+  }
+  const cols = [
+    { key: 'name', label: '姓名' },
+    { key: 'language', label: '語別' },
+    { key: 'oldClass', label: '舊班級' },
+    { key: 'oldSeat', label: '舊座號' },
+    { key: 'newClass', label: '新班級' },
+    { key: 'newSeat', label: '新座號' },
+    { key: 'status', label: '狀態' },
+  ];
+  let html = '<table><thead><tr>';
+  for (const col of cols) {
+    const cls = state.sortKey === col.key ? (state.sortAsc ? 'sorted asc' : 'sorted') : '';
+    html += `<th class="${cls}" data-sort="${col.key}">${col.label}</th>`;
+  }
+  html += '</tr></thead><tbody>';
+  for (const r of rows) {
+    let rowClass = '';
+    if (r.matchType === 'unmatched') rowClass = 'unmatched-row';
+    else if (r.matchType === 'fuzzy') rowClass = 'fuzzy-row';
+    else if (r.matchType === 'ambiguous') rowClass = 'ambiguous-row';
+
+    let statusTag;
+    if (r.matchType === 'unmatched') statusTag = '<span class="tag-missing">未配對</span>';
+    else if (r.matchType === 'ambiguous') {
+      const cands = (r.fuzzyCandidates || []).map(c => escapeHtml(c.name)).join('/');
+      statusTag = `<span class="tag-ambiguous" title="候選:${cands}">🟠 多候選</span>`;
+    }
+    else if (r.matchType === 'fuzzy') {
+      statusTag = `<span class="tag-fuzzy" title="原名:${escapeHtml(r.name)} → 配對到:${escapeHtml(r.fuzzyCandidate)}">🟡 疑似(→${escapeHtml(r.fuzzyCandidate)})</span>`;
+    }
+    else if (r.classChanged) statusTag = '<span class="tag-change">班級異動</span>';
+    else statusTag = '<span class="tag-nochange">無異動</span>';
+
+    const newClassCell = r.matched
+      ? `<span class="${r.classChanged ? 'changed-highlight' : ''}">${escapeHtml(r.newClass || '')}</span>`
+      : '<span style="color:var(--danger)">—</span>';
+    const newSeatCell = r.matched
+      ? `<span class="${r.classChanged ? 'changed-highlight' : ''}">${escapeHtml(r.newSeat || '')}</span>`
+      : '<span style="color:var(--danger)">—</span>';
+    html += `<tr class="${rowClass}">
+      <td><b>${escapeHtml(r.name)}</b>${r.tribe ? `<small style="color:var(--gray-500)">(${escapeHtml(r.tribe)})</small>` : ''}</td>
+      <td><span class="tag ${langTagClass(r.language)}">${escapeHtml(r.language || '')}</span></td>
+      <td>${escapeHtml(r.oldClass || '')}</td>
+      <td>${escapeHtml(r.oldSeat || '')}</td>
+      <td>${newClassCell}</td>
+      <td>${newSeatCell}</td>
+      <td>${statusTag}</td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+  wrap.querySelectorAll('th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const k = th.dataset.sort;
+      if (state.sortKey === k) state.sortAsc = !state.sortAsc;
+      else { state.sortKey = k; state.sortAsc = true; }
+      renderTable();
+    });
+  });
+}
+
+function renderGroupedTable(rows) {
+  const wrap = $('tableWrap');
+  if (!rows.length) {
+    wrap.innerHTML = '<div class="empty">沒有符合條件的資料</div>';
+    return;
+  }
+  // Group by newClass → language
+  const groups = {};
+  for (const r of rows) {
+    const cls = r.newClass || '（未配對）';
+    if (!groups[cls]) groups[cls] = {};
+    const lang = languageCategory(r.language);
+    if (!groups[cls][lang]) groups[cls][lang] = [];
+    groups[cls][lang].push(r);
+  }
+  const classKeys = Object.keys(groups).sort((a, b) => a.localeCompare(b, 'zh-Hant'));
+  let html = '';
+  for (const cls of classKeys) {
+    const langGroups = groups[cls];
+    const total = Object.values(langGroups).reduce((s, a) => s + a.length, 0);
+    html += `<div class="group-block">
+      <h3>📚 ${escapeHtml(cls)} <small>共 ${total} 位學生</small></h3>`;
+    const langKeys = Object.keys(langGroups).sort();
+    for (const lang of langKeys) {
+      const list = langGroups[lang].sort((a,b) => (parseInt(a.newSeat)||999) - (parseInt(b.newSeat)||999));
+      html += `<div class="group-lang">
+        <div class="group-lang-head"><span class="tag ${langTagClass(lang)}">${lang}</span> <small style="color:var(--text-subtle);font-weight:400">${list.length} 位</small></div>
+        <table><thead><tr><th>新座號</th><th>姓名</th><th>舊班級</th><th>舊座號</th><th>狀態</th></tr></thead><tbody>`;
+      for (const r of list) {
+        let rowClass = '';
+        if (r.matchType === 'unmatched') rowClass = 'unmatched-row';
+        else if (r.matchType === 'fuzzy') rowClass = 'fuzzy-row';
+        else if (r.matchType === 'ambiguous') rowClass = 'ambiguous-row';
+
+        let statusTag;
+        if (r.matchType === 'unmatched') statusTag = '<span class="tag-missing">未配對</span>';
+        else if (r.matchType === 'ambiguous') statusTag = '<span class="tag-ambiguous">🟠 多候選</span>';
+        else if (r.matchType === 'fuzzy') statusTag = `<span class="tag-fuzzy" title="→ ${escapeHtml(r.fuzzyCandidate)}">🟡 疑似</span>`;
+        else if (r.classChanged) statusTag = '<span class="tag-change">異動</span>';
+        else statusTag = '<span class="tag-nochange">—</span>';
+
+        html += `<tr class="${rowClass}">
+          <td>${escapeHtml(r.newSeat || '—')}</td>
+          <td><b>${escapeHtml(r.name)}</b>${r.tribe ? `<small style="color:var(--gray-500)">(${escapeHtml(r.tribe)})</small>` : ''}</td>
+          <td>${escapeHtml(r.oldClass || '')}</td>
+          <td>${escapeHtml(r.oldSeat || '')}</td>
+          <td>${statusTag}</td>
+        </tr>`;
+      }
+      html += '</tbody></table></div>';
+    }
+    html += '</div>';
+  }
+  wrap.innerHTML = html;
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ============================================================
+// Export
+// ============================================================
+function statusText(s) {
+  if (s.matchType === 'unmatched') return '🔴 完全未配對';
+  if (s.matchType === 'ambiguous') {
+    const cands = (s.fuzzyCandidates || []).map(c => c.name).join('/');
+    return `🟠 多候選待確認(候選:${cands})`;
+  }
+  if (s.matchType === 'fuzzy') return `🟡 疑似配對(原名→${s.fuzzyCandidate})`;
+  if (s.classChanged) return '✅ 班級異動';
+  return '✔ 無異動';
+}
+
+function exportFlat() {
+  const rows = state.merged.map(s => ({
+    姓名: s.rawName || s.name,
+    清名: s.name,
+    族別: s.tribe || '',
+    語別: s.language,
+    舊班級: s.oldClass,
+    舊座號: s.oldSeat,
+    新班級: s.newClass,
+    新座號: s.newSeat,
+    狀態: statusText(s),
+    原任教師: s.teacher || ''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:14},{wch:10},{wch:10},{wch:14},{wch:10},{wch:8},{wch:10},{wch:8},{wch:22},{wch:10}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '配對結果');
+  XLSX.writeFile(wb, `本土語配對結果${fileSuffix()}.xlsx`);
+  toast('已匯出平面對照表', 'success');
+}
+
+function exportMatrix() {
+  // Group by NEW class, then by language category
+  const classGroups = {};
+  for (const s of state.merged) {
+    if (!s.matched) continue;
+    const cls = s.newClass;
+    if (!classGroups[cls]) classGroups[cls] = { 閩語: [], 客語: [], 族語: [], 新住民語: [], 手語: [], 其他: [] };
+    const cat = languageCategory(s.language);
+    (classGroups[cls][cat] || classGroups[cls]['其他']).push(s);
+  }
+  const classKeys = Object.keys(classGroups).sort((a,b) => a.localeCompare(b, 'zh-Hant'));
+  const wb = XLSX.utils.book_new();
+  const aoa = [];
+  aoa.push(['115學年度本土語選修名單 (新班級更新)', '', '', '', '', '']);
+  aoa.push([]);
+  for (const cls of classKeys) {
+    aoa.push([`班級:${cls}`]);
+    aoa.push(['編號', '閩語座號', '閩語姓名', '客語座號', '客語姓名', '族語/新住民/手語座號', '族語/新住民/手語姓名']);
+    const langs = classGroups[cls];
+    const others = [...langs['族語'], ...langs['新住民語'], ...langs['手語'], ...langs['其他']];
+    const sortBySeat = arr => arr.sort((a,b) => (parseInt(a.newSeat)||999) - (parseInt(b.newSeat)||999));
+    sortBySeat(langs['閩語']);
+    sortBySeat(langs['客語']);
+    sortBySeat(others);
+    const maxLen = Math.max(langs['閩語'].length, langs['客語'].length, others.length);
+    for (let i = 0; i < maxLen; i++) {
+      const row = [
+        i + 1,
+        langs['閩語'][i]?.newSeat || '',
+        langs['閩語'][i]?.rawName || langs['閩語'][i]?.name || '',
+        langs['客語'][i]?.newSeat || '',
+        langs['客語'][i]?.rawName || langs['客語'][i]?.name || '',
+        others[i]?.newSeat || '',
+        others[i]?.rawName || others[i]?.name || ''
+      ];
+      aoa.push(row);
+    }
+    aoa.push([`總人數: ${langs['閩語'].length + langs['客語'].length + others.length} 人 (閩${langs['閩語'].length} / 客${langs['客語'].length} / 其他${others.length})`]);
+    aoa.push([]);
+  }
+  // Fuzzy (疑似配對) 區塊 — 提醒人工核對
+  const fuzzyList = state.merged.filter(s => s.matchType === 'fuzzy');
+  if (fuzzyList.length) {
+    aoa.push([]);
+    aoa.push(['🟡 疑似配對名單 (1 字差異,請人工核對)']);
+    aoa.push(['原名(舊)', '族別', '新名(配對到)', '語別', '舊班級', '舊座號', '新班級', '新座號']);
+    for (const s of fuzzyList) {
+      aoa.push([s.rawName || s.name, s.tribe || '', s.fuzzyCandidate, s.language, s.oldClass, s.oldSeat, s.newClass, s.newSeat]);
+    }
+  }
+
+  // Ambiguous (多候選) 區塊
+  const ambiguousList = state.merged.filter(s => s.matchType === 'ambiguous');
+  if (ambiguousList.length) {
+    aoa.push([]);
+    aoa.push(['🟠 多候選待確認 (1 字差異候選超過 1 位)']);
+    aoa.push(['姓名', '族別', '語別', '舊班級', '舊座號', '候選名單']);
+    for (const s of ambiguousList) {
+      const cands = (s.fuzzyCandidates || []).map(c => `${c.name}(${c.newClass}#${c.newSeat})`).join(' / ');
+      aoa.push([s.rawName || s.name, s.tribe || '', s.language, s.oldClass, s.oldSeat, cands]);
+    }
+  }
+
+  // Unmatched
+  const unmatched = state.merged.filter(s => s.matchType === 'unmatched');
+  if (unmatched.length) {
+    aoa.push([]);
+    aoa.push(['🔴 完全未配對名單 (新名冊中找不到此姓名)']);
+    aoa.push(['姓名', '族別', '語別', '舊班級', '舊座號']);
+    for (const s of unmatched) {
+      aoa.push([s.rawName || s.name, s.tribe || '', s.language, s.oldClass, s.oldSeat]);
+    }
+  }
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:8},{wch:10},{wch:12},{wch:10},{wch:12},{wch:10},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws, '新本土語名單');
+  XLSX.writeFile(wb, `新本土語名單${fileSuffix()}.xlsx`);
+  toast('已匯出新本土語名單', 'success');
+}
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// Summarize grades present in the merged data — used for filenames
+function gradeSummary() {
+  const grades = new Set();
+  for (const s of state.merged) {
+    const src = s.newClass || s.oldClass || '';
+    const m = src.match(/^(\d+)年/);
+    if (m) grades.add(m[1]);
+  }
+  return [...grades].sort().map(g => `${g}年級`).join('+');
+}
+
+function fileSuffix() {
+  const grades = gradeSummary();
+  return grades ? `_${grades}_${todayStr()}` : `_${todayStr()}`;
+}
+
+// ============================================================
+// File Upload Handlers (supports multiple files)
+// ============================================================
+function readFileAsArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = ev => resolve(new Uint8Array(ev.target.result));
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function setupDropzone(zoneId, inputId, iconId, textId, fileNameId, kind) {
+  const zone = $(zoneId);
+  const input = $(inputId);
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+      input.files = e.dataTransfer.files;
+      input.dispatchEvent(new Event('change'));
+    }
+  });
+  input.addEventListener('change', async e => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    // Reset accumulated state for this kind
+    if (kind === 'old') state.oldStudents = [];
+    else state.newRoster = [];
+
+    const fileInfos = [];
+    try {
+      for (const file of files) {
+        const data = await readFileAsArrayBuffer(file);
+        const wb = XLSX.read(data, { type: 'array' });
+        if (kind === 'old') {
+          const before = state.oldStudents.length;
+          const parsed = parseOldWorkbook(wb);
+          state.oldStudents.push(...parsed);
+          fileInfos.push({ name: file.name, count: state.oldStudents.length - before });
+        } else {
+          const before = state.newRoster.length;
+          const parsed = parseNewRoster(wb);
+          state.newRoster.push(...parsed);
+          fileInfos.push({ name: file.name, count: state.newRoster.length - before });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      toast('讀取檔案時發生錯誤:' + err.message, 'error', 6000);
+      return;
+    }
+
+    const total = kind === 'old' ? state.oldStudents.length : state.newRoster.length;
+    if (total === 0) {
+      const hint = kind === 'old'
+        ? '未能解析出任何學生資料,請確認檔案格式(需含「班級:」「語別:」「編號」等欄位)'
+        : '未能解析出任何學生,請確認新名冊包含「姓名、班級、座號」欄位(可點 📥 下載範本參考)';
+      toast(hint, 'error', 7000);
+      return;
+    }
+    toast(`成功載入 ${total} 位學生(${files.length > 1 ? files.length + ' 個檔案' : files[0].name})`, 'success', 3500);
+
+    // Update dropzone display
+    $(iconId).textContent = '✅';
+    if (files.length === 1) {
+      $(textId).textContent = (kind === 'old' ? '舊名單' : '新名冊') + '解析成功';
+      $(fileNameId).textContent = files[0].name;
+    } else {
+      $(textId).textContent = `已載入 ${files.length} 個檔案,共 ${total} 筆`;
+      $(fileNameId).innerHTML = fileInfos.map(f =>
+        `<div>📄 ${escapeHtml(f.name)} (${f.count} 位)</div>`
+      ).join('');
+    }
+    zone.classList.add('loaded');
+
+    renderStats();
+    if (state.oldStudents.length && state.newRoster.length) {
+      doMatch();
+      populateFilters();
+      renderAlerts();
+      $('resultsSection').style.display = 'block';
+      renderTable();
+    }
+  });
+}
+
+setupDropzone('oldZone', 'oldFile', 'oldIcon', 'oldText', 'oldFileName', 'old');
+setupDropzone('newZone', 'newFile', 'newIcon', 'newText', 'newFileName', 'new');
+
+// ============================================================
+// Theme toggle (dark/light) + localStorage
+// ============================================================
+(function setupTheme() {
+  const root = document.documentElement;
+  const saved = localStorage.getItem('theme') ||
+    (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  root.setAttribute('data-theme', saved);
+  const btn = document.getElementById('themeToggle');
+  if (btn) {
+    btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+    btn.title = saved === 'dark' ? '切換為淺色模式' : '切換為深色模式';
+    btn.addEventListener('click', () => {
+      const cur = root.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      btn.textContent = next === 'dark' ? '☀️' : '🌙';
+      btn.title = next === 'dark' ? '切換為淺色模式' : '切換為深色模式';
+    });
+  }
+})();
+
+// Help shortcut — scroll to help details + open
+document.getElementById('helpToggle')?.addEventListener('click', () => {
+  const help = document.querySelector('details.help');
+  if (help) {
+    help.open = true;
+    help.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
+
+// ============================================================
+// Stepper state sync
+// ============================================================
+function updateStepper() {
+  const s1 = document.getElementById('step1');
+  const s2 = document.getElementById('step2');
+  const s3 = document.getElementById('step3');
+  const c12 = document.getElementById('connector12');
+  const c23 = document.getElementById('connector23');
+  const card1 = document.getElementById('card1');
+  const card2 = document.getElementById('card2');
+  if (!s1) return;
+  [s1, s2, s3].forEach(el => el.classList.remove('active', 'done'));
+  c12?.classList.remove('done');
+  c23?.classList.remove('done');
+  card1?.classList.remove('done');
+  card2?.classList.remove('done');
+
+  const hasOld = state.oldStudents.length > 0;
+  const hasNew = state.newRoster.length > 0;
+
+  if (hasOld) { s1.classList.add('done'); card1?.classList.add('done'); c12?.classList.add('done'); }
+  else s1.classList.add('active');
+
+  if (hasNew) { s2.classList.add('done'); card2?.classList.add('done'); c23?.classList.add('done'); }
+  else if (hasOld) s2.classList.add('active');
+
+  if (hasOld && hasNew) s3.classList.add('active');
+}
+
+// Hook stepper into renderStats (cheap: called after every upload)
+const _origRenderStats = renderStats;
+renderStats = function() { _origRenderStats(); updateStepper(); };
+updateStepper();
+
+// Template download
+$('downloadTemplate').addEventListener('click', () => {
+  const sample = [
+    { 姓名: '王小明', 新班級: '3年1班', 新座號: 1 },
+    { 姓名: '陳美玲', 新班級: '3年1班', 新座號: 2 },
+    { 姓名: '李大華', 新班級: '3年2班', 新座號: 1 },
+    { 姓名: '林怡君', 新班級: '3年2班', 新座號: 2 },
+    { 姓名: '張家豪', 新班級: '3年3班', 新座號: 1 }
+  ];
+  const ws = XLSX.utils.json_to_sheet(sample);
+  ws['!cols'] = [{ wch: 14 }, { wch: 14 }, { wch: 10 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '新編班名冊');
+  XLSX.writeFile(wb, '新編班名冊範本.xlsx');
+});
+
+// Filter listeners
+['searchInput', 'filterClass', 'filterLang', 'filterStatus'].forEach(id => {
+  $(id).addEventListener('input', renderTable);
+  $(id).addEventListener('change', renderTable);
+});
+$('clearFilters').addEventListener('click', () => {
+  $('searchInput').value = '';
+  $('filterClass').value = '';
+  $('filterLang').value = '';
+  $('filterStatus').value = '';
+  renderTable();
+});
+
+document.querySelectorAll('.toggle-bar button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.toggle-bar button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.viewMode = btn.dataset.view;
+    renderTable();
+  });
+});
+
+$('exportFlatBtn').addEventListener('click', exportFlat);
+$('exportMatrixBtn').addEventListener('click', exportMatrix);
+
+// ============================================================
+// #3 Reset button — clear all data & reset UI
+// ============================================================
+$('resetBtn').addEventListener('click', () => {
+  if (!state.oldStudents.length && !state.newRoster.length) {
+    toast('目前沒有資料可清除', 'info', 2500); return;
+  }
+  const ok = confirm('確定要清除所有已上傳的資料並重新開始嗎?\n(此動作無法復原,但可重新上傳檔案)');
+  if (!ok) return;
+  state.oldStudents = [];
+  state.newRoster = [];
+  state.merged = [];
+  state.newRosterMap = null;
+  state.newRosterDups = null;
+  // Reset dropzones
+  ['oldZone', 'newZone'].forEach(id => $(id).classList.remove('loaded'));
+  $('oldIcon').textContent = '📋'; $('newIcon').textContent = '📝';
+  $('oldText').textContent = '點擊或拖曳上傳'; $('newText').textContent = '點擊或拖曳上傳';
+  $('oldFileName').innerHTML = ''; $('newFileName').innerHTML = '';
+  $('oldFile').value = ''; $('newFile').value = '';
+  // Hide results
+  $('resultsSection').style.display = 'none';
+  // Clear filters & state
+  ['searchInput', 'filterClass', 'filterLang', 'filterStatus'].forEach(id => { $(id).value = ''; });
+  // Clear localStorage cache
+  try { localStorage.removeItem(LS_KEY); } catch (e) {}
+  renderStats();
+  toast('已清除所有資料', 'success', 2500);
+});
+
+// ============================================================
+// Print button
+// ============================================================
+$('printBtn').addEventListener('click', () => {
+  // Switch to grouped view for better print layout
+  const wasView = state.viewMode;
+  if (wasView !== 'grouped') {
+    document.querySelectorAll('.toggle-bar button').forEach(b => {
+      b.classList.toggle('active', b.dataset.view === 'grouped');
+    });
+    state.viewMode = 'grouped';
+    renderTable();
+  }
+  setTimeout(() => window.print(), 120);
+});
+
+// ============================================================
+// #2 Keyboard shortcuts
+// ============================================================
+const SHORTCUTS = [
+  { keys: ['Ctrl', 'K'],     mac: ['⌘', 'K'],     desc: '聚焦搜尋框' },
+  { keys: ['Ctrl', 'D'],     mac: ['⌘', 'D'],     desc: '切換深色/淺色模式' },
+  { keys: ['Ctrl', 'E'],     mac: ['⌘', 'E'],     desc: '匯出平面表 (Excel)' },
+  { keys: ['Ctrl', 'Shift', 'E'], mac: ['⌘', '⇧', 'E'], desc: '匯出新名單 (Excel)' },
+  { keys: ['Ctrl', 'P'],     mac: ['⌘', 'P'],     desc: '列印配對結果' },
+  { keys: ['?'],             mac: ['?'],          desc: '開啟/關閉本快捷鍵提示' },
+  { keys: ['Esc'],           mac: ['Esc'],        desc: '清除篩選 / 關閉對話框' }
+];
+const isMac = /Mac/.test(navigator.platform);
+
+document.addEventListener('keydown', e => {
+  const mod = e.ctrlKey || e.metaKey;
+  const inInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName);
+  const inEditable = e.target.isContentEditable;
+
+  // Ctrl/⌘ + K — focus search
+  if (mod && !e.shiftKey && (e.key === 'k' || e.key === 'K')) {
+    e.preventDefault();
+    $('searchInput')?.focus();
+    return;
+  }
+  // Ctrl/⌘ + D — toggle theme
+  if (mod && !e.shiftKey && (e.key === 'd' || e.key === 'D')) {
+    e.preventDefault();
+    $('themeToggle')?.click();
+    return;
+  }
+  // Ctrl/⌘ + E — export flat (only if results visible)
+  if (mod && !e.shiftKey && (e.key === 'e' || e.key === 'E')) {
+    if ($('resultsSection').style.display !== 'none') {
+      e.preventDefault();
+      $('exportFlatBtn').click();
+    }
+    return;
+  }
+  // Ctrl/⌘ + Shift + E — export matrix
+  if (mod && e.shiftKey && (e.key === 'e' || e.key === 'E')) {
+    if ($('resultsSection').style.display !== 'none') {
+      e.preventDefault();
+      $('exportMatrixBtn').click();
+    }
+    return;
+  }
+  // ? — show shortcuts (when not typing)
+  if (e.key === '?' && !mod && !inInput && !inEditable) {
+    e.preventDefault();
+    $('shortcutsBtn').click();
+    return;
+  }
+  // Esc — clear filters if focus in search, or close modals/toasts
+  if (e.key === 'Escape') {
+    const modal = document.querySelector('.modal-backdrop');
+    if (modal) { modal.remove(); return; }
+    if (inInput && e.target.id === 'searchInput') {
+      $('clearFilters').click();
+      e.target.blur();
+    }
+  }
+});
+
+// Shortcuts modal
+$('shortcutsBtn').addEventListener('click', () => {
+  const rows = SHORTCUTS.map(s => {
+    const keys = (isMac ? s.mac : s.keys).map(k => `<kbd>${k}</kbd>`).join(' + ');
+    return `<div class="shortcut-row"><span class="desc">${s.desc}</span><span class="keys">${keys}</span></div>`;
+  }).join('');
+  const html = `
+    <h3 class="modal-title">⌨️ 鍵盤快捷鍵</h3>
+    <p class="modal-sub">加速您的操作體驗</p>
+    <div>${rows}</div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" data-close>了解</button>
+    </div>`;
+  const m = openModal(html);
+  m.card.querySelector('[data-close]').addEventListener('click', m.close);
+});
+
+// ============================================================
+// #6 Ambiguous candidate picker (manual confirm modal)
+// ============================================================
+function openCandidatePicker(student) {
+  const candidates = student.fuzzyCandidates || [];
+  if (!candidates.length) { toast('此學生沒有候選名單', 'warning'); return; }
+  const listItems = candidates.map((c, i) => `
+    <li data-idx="${i}">
+      <span class="name">${escapeHtml(c.name)}</span>
+      <span class="meta">${escapeHtml(c.newClass)} · 座號 ${escapeHtml(c.newSeat)}</span>
+    </li>`).join('');
+  const html = `
+    <h3 class="modal-title">🟠 手動確認多候選</h3>
+    <p class="modal-sub">
+      舊名單:<code>${escapeHtml(student.rawName || student.name)}</code>(${escapeHtml(student.oldClass)} · 座號 ${escapeHtml(student.oldSeat)})<br/>
+      以下是姓名相差 1 字的候選,請選擇正確對象:
+    </p>
+    <ul class="candidate-list">
+      ${listItems}
+      <li data-idx="-1" class="reject">🔴 都不是 → 標記為完全未配對</li>
+    </ul>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-cancel>取消</button>
+    </div>`;
+  const m = openModal(html);
+  m.card.querySelectorAll('li[data-idx]').forEach(li => {
+    li.addEventListener('click', () => {
+      const idx = parseInt(li.dataset.idx);
+      if (idx >= 0) {
+        const chosen = candidates[idx];
+        student.newClass = chosen.newClass;
+        student.newSeat = chosen.newSeat;
+        student.matched = true;
+        student.matchType = 'fuzzy';
+        student.classChanged = student.oldClass !== chosen.newClass;
+        student.fuzzyCandidate = chosen.name;
+        student.fuzzyCandidates = null;
+        toast(`已確認配對:${student.name} → ${chosen.name}`, 'success', 2500);
+      } else {
+        student.matched = false;
+        student.matchType = 'unmatched';
+        student.newClass = '';
+        student.newSeat = '';
+        student.fuzzyCandidates = null;
+        toast(`${student.name} 已標記為未配對`, 'info', 2500);
+      }
+      m.close();
+      renderAlerts();
+      renderTable();
+      saveState();
+    });
+  });
+  m.card.querySelector('[data-cancel]').addEventListener('click', m.close);
+}
+
+// Wire up click on ambiguous tag in table
+document.addEventListener('click', e => {
+  const tag = e.target.closest('.tag-ambiguous');
+  if (!tag) return;
+  const row = tag.closest('tr');
+  if (!row) return;
+  // Find student by matching name cell content
+  const nameCell = row.querySelector('td:first-child b');
+  if (!nameCell) return;
+  const nameText = nameCell.textContent.trim();
+  const student = state.merged.find(s => s.name === nameText && s.matchType === 'ambiguous');
+  if (student) openCandidatePicker(student);
+});
+
+// ============================================================
+// #8 LocalStorage state memory
+// ============================================================
+const LS_KEY = 'nativeLangMatcher_v2_state';
+const LS_MAX_AGE_MS = 72 * 60 * 60 * 1000; // 72 hours
+
+function saveState() {
+  try {
+    const payload = {
+      v: 2,
+      timestamp: Date.now(),
+      oldStudents: state.oldStudents,
+      newRoster: state.newRoster,
+      merged: state.merged
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(payload));
+  } catch (err) {
+    console.warn('localStorage save failed:', err);
+  }
+}
+
+function loadStatePrompt() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    const age = Date.now() - (data.timestamp || 0);
+    if (age > LS_MAX_AGE_MS) { localStorage.removeItem(LS_KEY); return; }
+    if (!data.oldStudents?.length || !data.newRoster?.length) return;
+    const ageHours = Math.floor(age / 3600000);
+    const ageLabel = ageHours < 1 ? '不到 1 小時前' : `${ageHours} 小時前`;
+    setTimeout(() => {
+      const html = `
+        <h3 class="modal-title">💾 偵測到上次的資料</h3>
+        <p class="modal-sub">
+          ${ageLabel}您處理過:<br/>
+          • 舊名單 <b>${data.oldStudents.length}</b> 位學生<br/>
+          • 新名冊 <b>${data.newRoster.length}</b> 位學生<br/>
+          要載入繼續作業嗎?
+        </p>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" data-discard>丟棄重新開始</button>
+          <button class="btn btn-primary" data-load>載入上次資料</button>
+        </div>`;
+      const m = openModal(html);
+      m.card.querySelector('[data-load]').addEventListener('click', () => {
+        state.oldStudents = data.oldStudents || [];
+        state.newRoster = data.newRoster || [];
+        if (state.oldStudents.length && state.newRoster.length) {
+          doMatch(); populateFilters(); renderAlerts();
+          $('resultsSection').style.display = 'block';
+        }
+        renderStats();
+        renderTable();
+        // Update dropzone UI to reflect loaded state
+        if (state.oldStudents.length) {
+          $('oldZone').classList.add('loaded');
+          $('oldIcon').textContent = '✅';
+          $('oldText').textContent = `舊名單已還原 (${state.oldStudents.length} 位)`;
+        }
+        if (state.newRoster.length) {
+          $('newZone').classList.add('loaded');
+          $('newIcon').textContent = '✅';
+          $('newText').textContent = `新名冊已還原 (${state.newRoster.length} 位)`;
+        }
+        m.close();
+        toast('已從上次的資料還原', 'success');
+      });
+      m.card.querySelector('[data-discard]').addEventListener('click', () => {
+        localStorage.removeItem(LS_KEY);
+        m.close();
+        toast('已丟棄上次資料', 'info', 2000);
+      });
+    }, 600);
+  } catch (err) {
+    console.warn('localStorage load failed:', err);
+    localStorage.removeItem(LS_KEY);
+  }
+}
+
+// Hook saveState after every successful match
+const _origDoMatch = doMatch;
+doMatch = function() { _origDoMatch(); saveState(); };
+
+// Load on page init
+loadStatePrompt();
+
+// ============================================================
+// #9 Summary report
+// ============================================================
+function generateSummary() {
+  if (!state.merged.length) { toast('尚無配對結果可分析', 'warning'); return; }
+
+  const total = state.merged.length;
+  const exact = state.merged.filter(s => s.matchType === 'exact').length;
+  const fuzzy = state.merged.filter(s => s.matchType === 'fuzzy').length;
+  const ambig = state.merged.filter(s => s.matchType === 'ambiguous').length;
+  const unmatched = state.merged.filter(s => s.matchType === 'unmatched').length;
+  const changed = state.merged.filter(s => s.matched && s.classChanged).length;
+  const successRate = ((total - unmatched) / total * 100).toFixed(1);
+
+  // Old class → New class flow
+  const flowMap = {};
+  for (const s of state.merged) {
+    if (!s.matched || !s.classChanged) continue;
+    const k = `${s.oldClass} → ${s.newClass}`;
+    flowMap[k] = (flowMap[k] || 0) + 1;
+  }
+  const topFlows = Object.entries(flowMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+  // Class headcount delta
+  const oldCount = {};
+  const newCount = {};
+  for (const s of state.merged) {
+    if (s.oldClass) oldCount[s.oldClass] = (oldCount[s.oldClass] || 0) + 1;
+    if (s.matched && s.newClass) newCount[s.newClass] = (newCount[s.newClass] || 0) + 1;
+  }
+  const allClasses = [...new Set([...Object.keys(oldCount), ...Object.keys(newCount)])].sort((a, b) => a.localeCompare(b, 'zh-Hant'));
+
+  // Language distribution (after match)
+  const langCount = {};
+  for (const s of state.merged) {
+    if (!s.matched) continue;
+    const c = languageCategory(s.language);
+    langCount[c] = (langCount[c] || 0) + 1;
+  }
+
+  const flowRows = topFlows.map(([k, n]) => `<tr><td>${escapeHtml(k)}</td><td style="text-align:right">${n} 人</td></tr>`).join('') || '<tr><td colspan="2" style="text-align:center;color:var(--text-subtle)">(無異動)</td></tr>';
+  const classRows = allClasses.map(c => {
+    const o = oldCount[c] || 0, n = newCount[c] || 0;
+    const d = n - o;
+    const arrow = d > 0 ? `<span class="delta-up">↑ +${d}</span>` : d < 0 ? `<span class="delta-down">↓ ${d}</span>` : '<span style="color:var(--text-subtle)">—</span>';
+    return `<tr><td>${escapeHtml(c)}</td><td style="text-align:right">${o}</td><td style="text-align:right">${n}</td><td style="text-align:right">${arrow}</td></tr>`;
+  }).join('');
+  const langChips = Object.entries(langCount).sort((a, b) => b[1] - a[1])
+    .map(([l, n]) => `<span class="stat-chip">${escapeHtml(l)} <b>${n}</b></span>`).join(' ');
+
+  const html = `
+    <h3 class="modal-title">📋 變動摘要報告</h3>
+    <p class="modal-sub">產生時間:${new Date().toLocaleString('zh-TW')}</p>
+
+    <div class="summary-grid">
+      <div class="summary-stat"><div class="num">${total}</div><div class="lbl">學生總數</div></div>
+      <div class="summary-stat success"><div class="num">${exact}</div><div class="lbl">精確配對</div></div>
+      <div class="summary-stat warning"><div class="num">${fuzzy}</div><div class="lbl">🟡 疑似配對</div></div>
+      <div class="summary-stat danger"><div class="num">${unmatched + ambig}</div><div class="lbl">待處理</div></div>
+    </div>
+    <div style="padding:10px 14px;background:var(--surface-2);border-radius:var(--r-md);border:1px solid var(--border);font-size:13px;color:var(--text-muted);margin-bottom:4px">
+      配對成功率 <b style="color:var(--brand-700)">${successRate}%</b>・班級異動 <b>${changed}</b> 筆・完全未配對 <b>${unmatched}</b> 筆・多候選 <b>${ambig}</b> 筆
+    </div>
+
+    <div class="summary-section">
+      <h4>🏫 各班級人數變化</h4>
+      <table class="summary-table">
+        <thead><tr><th>班級</th><th style="text-align:right">舊</th><th style="text-align:right">新</th><th style="text-align:right">變化</th></tr></thead>
+        <tbody>${classRows}</tbody>
+      </table>
+    </div>
+
+    <div class="summary-section">
+      <h4>🔀 主要流動方向 (Top 8)</h4>
+      <table class="summary-table">
+        <thead><tr><th>流動</th><th style="text-align:right">人次</th></tr></thead>
+        <tbody>${flowRows}</tbody>
+      </table>
+    </div>
+
+    <div class="summary-section">
+      <h4>🗣️ 語別分布 (已配對)</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">${langChips}</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-copy>📋 複製 Markdown</button>
+      <button class="btn btn-ghost" data-print>🖨️ 列印報告</button>
+      <button class="btn btn-primary" data-close>關閉</button>
+    </div>`;
+  const m = openModal(html);
+  m.card.querySelector('[data-close]').addEventListener('click', m.close);
+  m.card.querySelector('[data-print]').addEventListener('click', () => {
+    window.print();
+  });
+  m.card.querySelector('[data-copy]').addEventListener('click', async () => {
+    const md = generateMarkdownReport({ total, exact, fuzzy, ambig, unmatched, changed, successRate, topFlows, allClasses, oldCount, newCount, langCount });
+    try {
+      await navigator.clipboard.writeText(md);
+      toast('已複製 Markdown 到剪貼簿', 'success');
+    } catch {
+      toast('複製失敗,您的瀏覽器可能不支援剪貼簿 API', 'error');
+    }
+  });
+}
+
+function generateMarkdownReport(d) {
+  const lines = [];
+  lines.push(`# 本土語分班配對摘要報告`);
+  lines.push(`\n> 產生時間:${new Date().toLocaleString('zh-TW')}\n`);
+  lines.push(`## 關鍵數字\n`);
+  lines.push(`- 學生總數:**${d.total}** 位`);
+  lines.push(`- 配對成功率:**${d.successRate}%**`);
+  lines.push(`- ✅ 精確配對:${d.exact} 筆`);
+  lines.push(`- 🟡 疑似配對:${d.fuzzy} 筆`);
+  lines.push(`- 🟠 多候選待確認:${d.ambig} 筆`);
+  lines.push(`- 🔴 完全未配對:${d.unmatched} 筆`);
+  lines.push(`- 🔀 班級有異動:${d.changed} 筆\n`);
+  lines.push(`## 各班級人數變化\n`);
+  lines.push(`| 班級 | 舊 | 新 | 變化 |`);
+  lines.push(`|------|----|----|------|`);
+  for (const c of d.allClasses) {
+    const o = d.oldCount[c] || 0, n = d.newCount[c] || 0, diff = n - o;
+    const arrow = diff > 0 ? `↑ +${diff}` : diff < 0 ? `↓ ${diff}` : '—';
+    lines.push(`| ${c} | ${o} | ${n} | ${arrow} |`);
+  }
+  if (d.topFlows.length) {
+    lines.push(`\n## 主要流動方向\n`);
+    lines.push(`| 流動 | 人次 |`);
+    lines.push(`|------|------|`);
+    for (const [k, n] of d.topFlows) lines.push(`| ${k} | ${n} |`);
+  }
+  lines.push(`\n## 語別分布(已配對)\n`);
+  for (const [l, n] of Object.entries(d.langCount).sort((a, b) => b[1] - a[1])) {
+    lines.push(`- ${l}:${n} 位`);
+  }
+  return lines.join('\n');
+}
+
+$('reportBtn').addEventListener('click', generateSummary);
+
+// Auto-save state whenever dropzones successfully load
+// (saveState is called from doMatch already)
+</script>
+</body>
+</html>
