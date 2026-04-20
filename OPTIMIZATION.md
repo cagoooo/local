@@ -1,10 +1,10 @@
 # 優化改良藍圖 & 進度總表
 
-> **版本:v2.1 · 最後更新:2026-04-20**
+> **版本:v2.2 · 最後更新:2026-04-21**
 >
 > 本文件記錄**已完成的里程碑**以及**未來優化路線圖**。依優先順序與開發難度分成 7 波,每項都有「為什麼做、怎麼做、預計工時」三要素。
 >
-> **目前進度:27 項功能 ✅ · 49 項規劃中 🚧**
+> **目前進度:30 項功能 ✅ · 56 項規劃中 🚧**
 
 ## 目錄
 
@@ -25,16 +25,18 @@
 
 | 指標 | 數值 | 備註 |
 |------|------|------|
-| 版本 | **v2.1** | |
-| 核心檔案 | `index.html` 116.6 KB | 單檔 HTML,含所有 CSS + JS |
+| 版本 | **v2.2** | |
+| 核心檔案 | `index.html` 134.7 KB | 單檔 HTML,含所有 CSS + JS |
 | 圖片資產 | 11 個檔 (340 KB) | favicon × 5、apple × 1、android × 2、og × 2、manifest |
 | 外部依賴 | `xlsx@0.18.5`(CDN)、Google Fonts `Noto Sans TC` | |
-| 已實作功能 | **27 項**(v1.0 → v2.1) | 見下 |
-| 部署狀態 | 本地 `http://127.0.0.1:8000`,尚未上 GitHub Pages | |
+| 已實作功能 | **30 項**(v1.0 → v2.2) | 見下 |
+| 部署狀態 | ✅ 已上 GitHub Pages:<br/>`https://cagoooo.github.io/local/` | HTTPS enforced |
+| GitHub Repo | `cagoooo/local`(公開) | 已設 topics + description + homepage |
 | 瀏覽器支援 | 近 2 年版本的 Chrome/Edge/Firefox/Safari | backdrop-filter、color-mix 等需現代瀏覽器 |
 | 深色模式 | ✅ 自動偵測 + 手動切換 + 記憶 | |
 | a11y 分數 | 估計 85/100(未正式測) | ARIA 標籤、focus ring、reduced-motion 都有 |
 | PWA 就緒度 | 70%(有 manifest + icons,但缺 Service Worker) | |
+| 社群分享 | ✅ OG image + Twitter Card + LINE 預覽 | |
 
 ---
 
@@ -89,7 +91,16 @@
 | 🎨 | **圖片資產**(favicon × 8 + og-image 兩款 + manifest) | FB/LINE 分享會有預覽卡 |
 | 🌐 | **完整 Meta tags**(Open Graph + Twitter Card + 主題色) | GitHub Pages 部署免再設定 |
 
-**累計 27 項功能已完成,第一波 🔴 與第二波 ⚡ 全數打勾。**
+### 🔍 v2.2 · 透明化升級 · 3 項 · 2026-04-21
+
+| # | 項目 | 說明 |
+|---|------|------|
+| 28 | **範本下載資訊卡式 CTA** | ghost 小按鈕 → 寬版資訊卡(icon + 標題 + 徽章 + 描述 + CTA)· hover 微旋轉 + 光暈 · 整卡可點 |
+| 29 | **上傳後預覽 Modal(舊名單)** | 綠色「👁 查看完整解析內容」按鈕 + 可點擊的統計 chip → 開啟寬版 modal(820px)· 7 欄完整表格 + 即時搜尋 + 班級/語別雙重篩選 |
+| 30 | **上傳後預覽 Modal(新名冊)** | 同上,並自動偵測重複姓名警示 banner · 多工作表時加 sheet 篩選 |
+| 🚀 | **GitHub Pages 正式上線** | `https://cagoooo.github.io/local/` · HTTPS 強制 · v2.1/v2.2 tags 齊全 |
+
+**累計 30 項功能已完成,第一波 🔴 與第二波 ⚡ 全數打勾,第三波部分完成。**
 
 ---
 
@@ -351,6 +362,76 @@ window.addEventListener('load', () => {
 ```
 
 **預計工時**:1 小時
+
+---
+
+### 7️⃣-A 預覽 Modal 內直接編輯(承接 v2.2)
+
+**為什麼**:v2.2 的預覽只能看,若發現錯誤還得去改 Excel 重上傳。加上雙擊即編輯,核對過程中就能修正。
+
+**做法**:
+
+```javascript
+// 在 preview table 的 td 加上:
+td.addEventListener('dblclick', () => {
+  const original = td.textContent;
+  const input = document.createElement('input');
+  input.value = original;
+  input.style.cssText = 'width:100%;padding:4px;border:1px solid var(--brand-500);border-radius:4px';
+  td.innerHTML = '';
+  td.appendChild(input);
+  input.focus(); input.select();
+  const commit = () => {
+    const val = input.value.trim();
+    if (val !== original) {
+      // 更新對應 student 物件
+      const studentIdx = +td.closest('tr').dataset.idx;
+      const field = td.dataset.field;  // 'name' / 'oldClass' / 'oldSeat' / ...
+      students[studentIdx][field] = val;
+      students[studentIdx].manuallyEdited = true;
+      saveState();
+      toast('已更新', 'success', 1500);
+    }
+    renderRows();
+  };
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); commit(); }
+    if (e.key === 'Escape') renderRows();
+  });
+});
+```
+
+搭配 tooltip 提示:「雙擊可編輯」。編輯過的列加金色左邊條。
+
+**預計工時**:2-3 小時
+
+---
+
+### 7️⃣-B 預覽 Modal 支援「只匯出篩選結果」
+
+**為什麼**:有時只想把 3年1班 的名單寄給導師,不需要整份匯出。
+
+**做法**:在 preview modal 底部加「📤 匯出目前篩選結果」按鈕:
+
+```javascript
+function exportFiltered(filteredStudents, filename) {
+  const rows = filteredStudents.map(s => ({
+    姓名: s.rawName || s.name,
+    舊班級: s.oldClass || '',
+    舊座號: s.oldSeat || '',
+    語別: s.language || '',
+    族別: s.tribe || '',
+    任教老師: s.teacher || ''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '篩選結果');
+  XLSX.writeFile(wb, filename);
+}
+```
+
+**預計工時**:30 分鐘
 
 ---
 
@@ -1058,6 +1139,115 @@ playTone(220, 0.2, 'square');
 
 ---
 
+### 2️⃣4️⃣-A 行內快速動作(Row hover actions)
+
+**為什麼**:預覽/結果表格的列,滑鼠懸停時出現「快速動作」icon(複製、編輯、定位、刪除),比右鍵選單更直覺。
+
+**做法**:
+
+```css
+.preview-table tbody tr { position: relative; }
+.row-actions {
+  position: absolute;
+  right: 8px; top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-fast);
+}
+.preview-table tbody tr:hover .row-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+.row-actions button {
+  width: 28px; height: 28px;
+  padding: 0;
+  display: grid; place-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 13px;
+}
+.row-actions button:hover { background: var(--brand-100); border-color: var(--brand-400); }
+```
+
+```html
+<td>
+  姓名...
+  <span class="row-actions">
+    <button title="複製姓名" data-action="copy">📋</button>
+    <button title="編輯" data-action="edit">✏️</button>
+    <button title="定位到主表" data-action="locate">📍</button>
+  </span>
+</td>
+```
+
+**預計工時**:2 小時
+
+---
+
+### 2️⃣4️⃣-B 表格排序動畫
+
+**為什麼**:點欄位排序時,列跳來跳去會讓使用者失焦。加個 FLIP 動畫讓變化流暢。
+
+**做法**:用 FLIP 技巧(First-Last-Invert-Play):
+
+```javascript
+function sortWithAnimation(rows, sortFn) {
+  // 1. First: 記錄每列目前位置
+  const firstPositions = new Map();
+  rows.forEach(row => {
+    firstPositions.set(row.dataset.id, row.getBoundingClientRect().top);
+  });
+  // 2. 執行排序 + 重繪
+  const sorted = [...rows].sort(sortFn);
+  tbody.innerHTML = '';
+  sorted.forEach(row => tbody.appendChild(row));
+  // 3. Last: 記錄新位置,Invert: 計算差值並套用 transform
+  sorted.forEach(row => {
+    const last = row.getBoundingClientRect().top;
+    const first = firstPositions.get(row.dataset.id);
+    const delta = first - last;
+    if (delta) {
+      row.animate(
+        [{ transform: `translateY(${delta}px)` }, { transform: 'translateY(0)' }],
+        { duration: 300, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }
+      );
+    }
+  });
+}
+```
+
+**預計工時**:2 小時
+
+---
+
+### 2️⃣4️⃣-C Empty state 情境插畫
+
+**為什麼**:資料還沒上傳時,畫面空蕩蕩。用個插畫 + 引導文案會溫暖許多。
+
+**做法**:當 `#resultsSection` 隱藏但使用者已滾到下方時,改顯示引導區塊:
+
+```html
+<div class="empty-landing">
+  <div class="empty-illustration">
+    <!-- SVG 插畫:兩個 Excel 檔案 + 箭頭指向魔法棒 -->
+  </div>
+  <h3>完成上傳後,配對結果會出現在這裡</h3>
+  <p>您也可以先下載範本了解格式</p>
+  <button class="btn btn-primary" onclick="$('downloadTemplate').click()">📥 下載範本</button>
+</div>
+```
+
+SVG 插畫可以用 [unDraw](https://undraw.co/)(MIT 授權可商用,且可自訂顏色)。
+
+**預計工時**:1 小時
+
+---
+
 ## 🧠 第七波:智慧化(新)
 
 當工具從「配對器」進化成「助理」。
@@ -1258,6 +1448,176 @@ async function aiSummarize(summary) {
 
 ---
 
+### 3️⃣1️⃣ 資料完整性驗證(Data Integrity Lint)
+
+**為什麼**:使用者常在不知情下上傳了有問題的資料(座號重複、班級名稱錯字、姓名含特殊字元)。系統應該**主動掃描並提示**,而不是等到配對才發現。
+
+**做法**:在解析完成後跑一次 lint,預覽 Modal 頂部顯示警示 banner。
+
+```javascript
+function lintOldData(students) {
+  const issues = [];
+
+  // 1. 同班同座號重複
+  const seatMap = new Map();
+  for (const s of students) {
+    const k = `${s.oldClass}_${s.oldSeat}`;
+    if (seatMap.has(k)) {
+      issues.push({ type: 'duplicate_seat', severity: 'error',
+        msg: `${s.oldClass} 座號 ${s.oldSeat} 重複:${seatMap.get(k).name} 與 ${s.name}` });
+    }
+    seatMap.set(k, s);
+  }
+
+  // 2. 姓名長度異常(1 字或 > 5 字)
+  const oddNames = students.filter(s => s.name.length < 2 || s.name.length > 5);
+  if (oddNames.length) {
+    issues.push({ type: 'odd_name', severity: 'warning',
+      msg: `發現 ${oddNames.length} 位姓名長度異常(${oddNames.slice(0, 3).map(s => s.name).join('、')})` });
+  }
+
+  // 3. 姓名含非中文字元(疑似貼錯)
+  const nonCJK = students.filter(s => /[^\u4e00-\u9fff·‧・\s]/.test(s.name));
+  if (nonCJK.length) {
+    issues.push({ type: 'non_cjk', severity: 'warning',
+      msg: `${nonCJK.length} 位姓名含非中文字元,可能是複製貼上時帶入` });
+  }
+
+  // 4. 班級人數異常(< 5 或 > 35)
+  const byClass = {};
+  for (const s of students) byClass[s.oldClass] = (byClass[s.oldClass] || 0) + 1;
+  for (const [cls, n] of Object.entries(byClass)) {
+    if (n < 5) issues.push({ type: 'tiny_class', severity: 'info', msg: `${cls} 只有 ${n} 人,請確認` });
+    if (n > 35) issues.push({ type: 'huge_class', severity: 'warning', msg: `${cls} 有 ${n} 人,偏多` });
+  }
+
+  // 5. 座號跳號(1, 2, 3, 5, 6 — 缺 4)
+  for (const cls of Object.keys(byClass)) {
+    const seats = students.filter(s => s.oldClass === cls).map(s => parseInt(s.oldSeat)).sort((a, b) => a - b);
+    const missing = [];
+    for (let i = 1; i < seats[seats.length - 1]; i++) {
+      if (!seats.includes(i)) missing.push(i);
+    }
+    if (missing.length && missing.length < 5) {
+      issues.push({ type: 'seat_gap', severity: 'info',
+        msg: `${cls} 缺座號:${missing.slice(0, 5).join(', ')}(可能是未選修本土語)` });
+    }
+  }
+
+  return issues;
+}
+```
+
+UI 顯示:
+
+```
+┌─────────────────────────────────────────────────────┐
+│ ⚠️ 資料檢查發現 3 個問題(1 錯誤 / 2 警告)          │
+│                                                     │
+│ 🔴 3年1班 座號 8 重複:王小明 與 陳小明             │
+│ 🟡 發現 2 位姓名含非中文字元                        │
+│ 🟡 3年5班 有 37 人,偏多                            │
+│                                                     │
+│                                         [ 查看詳細 ]│
+└─────────────────────────────────────────────────────┘
+```
+
+**預計工時**:3-4 小時
+
+---
+
+### 3️⃣2️⃣ 格式自動修正建議
+
+**為什麼**:資料常有「看得見的小問題」(全形空白、前後空白、錯字),使用者自己掃不到。系統偵測後提供「一鍵修正」。
+
+**做法**:
+
+```javascript
+function suggestFixes(student) {
+  const fixes = [];
+  // 前後空白
+  if (student.name !== student.name.trim()) {
+    fixes.push({ field: 'name', current: student.name, suggested: student.name.trim(),
+      reason: '去除前後空白' });
+  }
+  // 全形空白
+  if (/[　]/.test(student.name)) {
+    fixes.push({ field: 'name', current: student.name, suggested: student.name.replace(/　/g, ''),
+      reason: '去除全形空白' });
+  }
+  // 班級中的全形數字
+  if (/[０-９]/.test(student.oldClass)) {
+    fixes.push({ field: 'oldClass', current: student.oldClass,
+      suggested: student.oldClass.replace(/[０-９]/g, d => String.fromCharCode(d.charCodeAt(0) - 0xFEE0)),
+      reason: '全形數字轉半形' });
+  }
+  // 常見錯字(「班」vs「斑」)
+  if (/\d+年\d+斑/.test(student.oldClass)) {
+    fixes.push({ field: 'oldClass', current: student.oldClass,
+      suggested: student.oldClass.replace('斑', '班'),
+      reason: '「斑」應為「班」' });
+  }
+  return fixes;
+}
+```
+
+UI:在預覽 modal 底部有「🔧 一鍵修正 N 個小問題」按鈕,點擊後顯示預覽差異並讓使用者確認。
+
+**預計工時**:3 小時
+
+---
+
+### 3️⃣3️⃣ 班級人數平衡視覺化
+
+**為什麼**:配對後想知道「是否均衡」。橫條圖比數字直覺。
+
+**做法**:用純 CSS grid + bar 做,不用引入 Chart.js:
+
+```html
+<div class="balance-chart">
+  <div class="balance-row">
+    <span class="label">3年1班</span>
+    <div class="bar-group">
+      <div class="bar bar-min" style="width:20%"><span>閩 15</span></div>
+      <div class="bar bar-kei" style="width:12%"><span>客 6</span></div>
+      <div class="bar bar-tribe" style="width:8%"><span>族 3</span></div>
+    </div>
+    <span class="total">24</span>
+  </div>
+  <!-- ...每班一列 -->
+</div>
+```
+
+配色沿用語別 tag 顏色,hover 時顯示 tooltip。
+
+**預計工時**:2-3 小時
+
+---
+
+### 3️⃣4️⃣ 智慧合併建議(偵測重複上傳)
+
+**為什麼**:使用者若兩次上傳包含同一個學生的檔案,目前會重複。系統應該提示「這筆已存在」。
+
+**做法**:
+
+```javascript
+function detectDuplicateUploads(newBatch, existing) {
+  const existingKeys = new Set(existing.map(s => `${normalizeName(s.name)}_${s.oldClass}_${s.oldSeat}`));
+  const duplicates = newBatch.filter(s => {
+    const k = `${normalizeName(s.name)}_${s.oldClass}_${s.oldSeat}`;
+    return existingKeys.has(k);
+  });
+  if (duplicates.length > 0) {
+    return confirm(`偵測到 ${duplicates.length} 筆與現有資料重複的記錄。\n\n選擇處理方式:\n- 確定 = 跳過重複,只加入新資料\n- 取消 = 全部加入(可能造成重複)`);
+  }
+  return true;
+}
+```
+
+**預計工時**:1 小時
+
+---
+
 ## 🎓 教學現場場景建議
 
 ### 情境 A:每學期例行作業
@@ -1413,4 +1773,30 @@ async function aiSummarize(summary) {
 
 **先求有、再求好、最後才求完美**。
 
-已完成 27 項,還有 49 項藍圖。每完成一項回來打 ✅,年底再回頭看會很有成就感。
+已完成 **30 項**,還有 **56 項**藍圖。每完成一項回來打 ✅,年底再回頭看會很有成就感。
+
+---
+
+## 📅 版本節奏對照
+
+| 版本 | 日期 | 累計功能 | 一句話定位 |
+|------|------|:-----:|-----------|
+| v1.0 | 2026-04-20 | 8 | 能動,且解析正確 |
+| v1.1 | 2026-04-20 | 12 | 好用(範本 + 模糊比對 + 多檔) |
+| v2.0 | 2026-04-20 | 18 | 好看(設計系統 + 深色模式) |
+| v2.1 | 2026-04-20 | 27 | 完整(Toast + 快捷鍵 + favicon + OG) |
+| **v2.2** | **2026-04-21** | **30** | **透明**(預覽 Modal + CTA 升級) |
+
+---
+
+## 🔭 預告 — 未來版本怎麼跳
+
+| 版本 | 預計內容 | 預計時程 |
+|------|---------|---------|
+| **v2.3** | 第一波小品 · Skeleton、confetti、tooltip、ripple | 2-3 小時 |
+| **v2.5** | 完成第三波:PWA SW + 手動編輯 + CSV 貼上 | 1 個月 |
+| **v3.0** | 完成大部分第三+四波:a11y + E2E + i18n | 3 個月 |
+| **v4.0** | TypeScript 重構 + Web Workers + 虛擬捲動 | 暑假 |
+| **v5.0** | Supabase + LINE Bot + 跨年度 Dashboard | 隔年 |
+
+依您自己的節奏,不用趕。每個版本發佈後記得打 git tag(`git tag -a v2.3 -m "..."` 然後 `git push --tags`)。
