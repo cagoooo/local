@@ -2,7 +2,7 @@
 
 > 小學升級分班後,自動更新本土語選修名單的網頁工具。上傳舊名單 + 新編班名冊,用「姓名」自動比對(含錯字模糊比對),即時產出更新後的班級/座號對照表與新本土語名單。
 
-![version](https://img.shields.io/badge/version-2.5-blueviolet) ![offline](https://img.shields.io/badge/offline-ready-green) ![stack](https://img.shields.io/badge/stack-Vanilla%20JS-yellow) ![darkmode](https://img.shields.io/badge/dark%20mode-✓-purple) ![a11y](https://img.shields.io/badge/a11y-WCAG%20AA-blue) ![social](https://img.shields.io/badge/OG%20image-✓-ff69b4) ![shortcuts](https://img.shields.io/badge/⌨️%20shortcuts-✓-lightgrey) ![preview](https://img.shields.io/badge/👁%20preview-✓-10b981) [![live](https://img.shields.io/badge/🌐%20live-cagoooo.github.io%2Flocal-0ea5e9)](https://cagoooo.github.io/local/)
+![version](https://img.shields.io/badge/version-2.6-blueviolet) ![offline](https://img.shields.io/badge/offline-ready-green) ![stack](https://img.shields.io/badge/stack-Vanilla%20JS-yellow) ![darkmode](https://img.shields.io/badge/dark%20mode-✓-purple) ![a11y](https://img.shields.io/badge/a11y-WCAG%20AA-blue) ![social](https://img.shields.io/badge/OG%20image-✓-ff69b4) ![shortcuts](https://img.shields.io/badge/⌨️%20shortcuts-✓-lightgrey) ![preview](https://img.shields.io/badge/👁%20preview-✓-10b981) [![live](https://img.shields.io/badge/🌐%20live-cagoooo.github.io%2Flocal-0ea5e9)](https://cagoooo.github.io/local/)
 
 ## 目錄
 
@@ -35,7 +35,19 @@
 
 ---
 
-## 🚀 v2.5 新增亮點(最新)
+## 🚀 v2.6 新增亮點(最新)
+
+**實戰驗證優化版** — 從真實使用案例發現問題並修復。
+
+| 🆕 | 項目 | 價值 |
+|:--:|------|------|
+| 🔢 | **班級格式 301 支援** | `301`→`3年1班`、`501`→`5年1班`、`609`→`6年9班`、國字年級也支援 |
+| ⚠️ | **低配對率強制警示** | < 50% 時彈出 modal 列出未配對班級分布 + 可能原因 + 快速重上傳 |
+| 🛡️ | **匯出前二次確認** | < 80% 時跳 confirm,避免誤匯出不完整檔案 |
+| 📊 | **匯出檔健康度頁首** | 開頭加「配對健康度指標」區塊:4 級評價 + 建議 |
+| 📁 | **未配對區依舊班級分組** | 每班一段「── 2年1班 (21 位) · 原任教師 XXX」,逐班核對更方便 |
+
+## 🚀 v2.5 新增亮點
 
 **品質升級版** — 工具主動把關,減少人為失誤。
 
@@ -493,7 +505,8 @@ native-lang-matcher/
 
 | 版本 | 日期 | 功能數 | 主要變動 |
 |------|------|:-----:|---------|
-| **v2.5** | 2026-04-21 | **39** | 品質升級:資料 lint、格式自動修正、班級視覺化、重複上傳偵測 |
+| **v2.6** | 2026-04-21 | **44** | 實戰驗證:301 班級格式、低配對警示、健康度指標、分組未配對 |
+| **v2.5** | 2026-04-21 | 39 | 品質升級:資料 lint、格式自動修正、班級視覺化、重複上傳偵測 |
 | **v2.3** | 2026-04-21 | 35 | 精緻化小品:ripple、tooltip、skeleton、progress bar、confetti |
 | **v2.2** | 2026-04-21 | 30 | 範本下載 CTA 資訊卡 + 上傳後預覽 Modal(舊名單 + 新名冊)+ GitHub Pages 正式上線 |
 | **v2.1** | 2026-04-20 | 27 | Toast、⌨️ 快捷鍵、重置、動畫計數、多候選 modal、列印模式、LocalStorage 記憶、摘要報告、favicon、OG 預覽圖 |

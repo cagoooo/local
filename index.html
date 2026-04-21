@@ -2527,10 +2527,40 @@ function normalizeClass(s) {
   if (s == null) return '';
   let v = String(s).replace(/\s+/g, '').trim();
   v = v.replace(/[０-９]/g, d => String.fromCharCode(d.charCodeAt(0) - 0xFEE0));
+
+  // 標準格式:「3年1班」/「五年三班」
   const m = v.match(/(\d+)\s*年\s*(\d+)\s*班/);
   if (m) return `${m[1]}年${m[2]}班`;
-  const m2 = v.match(/^(\d+)[-_ ](\d+)$/);
-  if (m2) return `${m2[1]}年${m2[2]}班`;
+
+  // 國字數字:「三年1班」/「5年三班」/「五年三班」
+  const cn = { '一':'1','二':'2','三':'3','四':'4','五':'5','六':'6','七':'7','八':'8','九':'9','十':'10' };
+  const m2 = v.match(/^([一二三四五六]|\d)年([一二三四五六七八九十]|\d{1,2})班$/);
+  if (m2) {
+    const g = cn[m2[1]] || m2[1];
+    const c = cn[m2[2]] || m2[2];
+    return `${g}年${c}班`;
+  }
+
+  // 連字號:「3-1」/「3_1」/「3 1」
+  const m3 = v.match(/^(\d+)[-_/ ](\d+)$/);
+  if (m3) return `${m3[1]}年${m3[2]}班`;
+
+  // 🆕 三位數格式:「301」/「501」/「609」→ 3年1班 / 5年1班 / 6年9班
+  //    第一位是年級(1-6),後兩位是班級(1-20)
+  const m4 = v.match(/^([1-6])(\d{1,2})$/);
+  if (m4) {
+    const cls = parseInt(m4[2]);
+    if (cls >= 1 && cls <= 20) return `${m4[1]}年${cls}班`;
+  }
+
+  // 🆕 四位數格式:「3101」= 3年10班、「0301」= 3年01班
+  //    優先嘗試「年+班(2位)」,再嘗試「學年度+班」
+  const m5 = v.match(/^(\d)(\d{2})$/);
+  if (m5) {
+    const cls = parseInt(m5[2]);
+    if (cls >= 1 && cls <= 20) return `${m5[1]}年${cls}班`;
+  }
+
   return v;
 }
 
@@ -3308,6 +3338,29 @@ function escapeHtml(s) {
 // ============================================================
 // Export
 // ============================================================
+// Pre-export quality check — returns false if user cancels
+function preExportCheck(format) {
+  const total = state.merged.length;
+  if (!total) return true;
+  const unmatched = state.merged.filter(s => s.matchType === 'unmatched').length;
+  const ambig = state.merged.filter(s => s.matchType === 'ambiguous').length;
+  const rate = ((total - unmatched - ambig) / total) * 100;
+  if (rate >= 80) return true;  // 品質夠高直接匯出
+
+  const msg =
+    `⚠️ 目前配對成功率只有 ${rate.toFixed(1)}%(${total - unmatched}/${total})\n\n` +
+    `這份 ${format} 會有:\n` +
+    `  • ${unmatched} 位完全未配對(列於附錄)\n` +
+    (ambig ? `  • ${ambig} 位多候選待確認\n` : '') +
+    `\n建議先確認:\n` +
+    `  1. 新編班名冊是否完整(包含所有班級)?\n` +
+    `  2. 姓名格式是否一致?\n` +
+    `  3. 班級命名是否正確?\n\n` +
+    `確定 = 仍然匯出\n` +
+    `取消 = 回去檢查`;
+  return confirm(msg);
+}
+
 function statusText(s) {
   if (s.matchType === 'unmatched') return '🔴 完全未配對';
   if (s.matchType === 'ambiguous') {
@@ -3320,6 +3373,7 @@ function statusText(s) {
 }
 
 function exportFlat() {
+  if (!preExportCheck('平面對照表')) { toast('已取消匯出', 'info', 2000); return; }
   const rows = state.merged.map(s => ({
     姓名: s.rawName || s.name,
     清名: s.name,
@@ -3341,6 +3395,26 @@ function exportFlat() {
 }
 
 function exportMatrix() {
+  if (!preExportCheck('新名單')) { toast('已取消匯出', 'info', 2000); return; }
+
+  // ---- v2.6 優化 4:健康度指標 ----
+  const total = state.merged.length;
+  const exact = state.merged.filter(s => s.matchType === 'exact').length;
+  const fuzzy = state.merged.filter(s => s.matchType === 'fuzzy').length;
+  const ambig = state.merged.filter(s => s.matchType === 'ambiguous').length;
+  const unmatch = state.merged.filter(s => s.matchType === 'unmatched').length;
+  const changed = state.merged.filter(s => s.matched && s.classChanged).length;
+  const rate = total ? ((total - unmatch) / total * 100) : 0;
+  let healthLabel, healthEmoji, advice;
+  if (rate >= 95)      { healthLabel = '優秀';  healthEmoji = '🎉'; advice = '資料完整且配對精準,可直接交付使用'; }
+  else if (rate >= 80) { healthLabel = '良好';  healthEmoji = '👍'; advice = '少數學生需人工確認,建議查看「未配對名單」附錄'; }
+  else if (rate >= 50) { healthLabel = '待確認'; healthEmoji = '⚠️'; advice = '配對率偏低,請確認新名冊是否完整、姓名格式是否一致'; }
+  else                 { healthLabel = '偏低,建議檢查'; healthEmoji = '🔴'; advice = '配對率過低,高機率是新名冊不完整(只含部分班級)或姓名格式差異過大,建議補齊再匯出'; }
+
+  const gradeSum = gradeSummary() || '—';
+  const now = new Date();
+  const ts = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
   // Group by NEW class, then by language category
   const classGroups = {};
   for (const s of state.merged) {
@@ -3353,8 +3427,28 @@ function exportMatrix() {
   const classKeys = Object.keys(classGroups).sort((a,b) => a.localeCompare(b, 'zh-Hant'));
   const wb = XLSX.utils.book_new();
   const aoa = [];
-  aoa.push(['115學年度本土語選修名單 (新班級更新)', '', '', '', '', '']);
+
+  // 頁首
+  aoa.push([`115學年度本土語選修名單 (新班級更新) · ${gradeSum}`]);
   aoa.push([]);
+
+  // === v2.6 優化 4:配對健康度指標 ===
+  aoa.push([`📊 配對健康度指標`, '', '', `產生時間:${ts}`]);
+  aoa.push([]);
+  aoa.push(['', '項目', '人數', '比例', '備註']);
+  aoa.push(['', '舊名單總人數', total, '100%', '來源:本土語選修名單']);
+  aoa.push(['', '✅ 精確配對', exact, `${(exact/total*100).toFixed(1)}%`, '姓名完全一致']);
+  if (fuzzy)   aoa.push(['', '🟡 疑似配對', fuzzy, `${(fuzzy/total*100).toFixed(1)}%`, '1 字差異,請人工核對']);
+  if (ambig)   aoa.push(['', '🟠 多候選', ambig, `${(ambig/total*100).toFixed(1)}%`, '1 字差異候選 > 1 位,待確認']);
+  aoa.push(['', '🔴 完全未配對', unmatch, `${(unmatch/total*100).toFixed(1)}%`, '新名冊找不到對應姓名']);
+  if (changed) aoa.push(['', '🔀 班級異動', changed, `${(changed/total*100).toFixed(1)}%`, '原班 → 新班']);
+  aoa.push([]);
+  aoa.push(['', `${healthEmoji} 健康度評價`, healthLabel, `${rate.toFixed(1)}%`]);
+  aoa.push(['', '建議', advice]);
+  aoa.push([]);
+  aoa.push(['─────────────────────────────────────────────────────────────']);
+  aoa.push([]);
+
   for (const cls of classKeys) {
     aoa.push([`班級:${cls}`]);
     aoa.push(['編號', '閩語座號', '閩語姓名', '客語座號', '客語姓名', '族語/新住民/手語座號', '族語/新住民/手語姓名']);
@@ -3403,16 +3497,37 @@ function exportMatrix() {
     }
   }
 
-  // Unmatched
+  // Unmatched — v2.6 優化 5:依舊班級分組
   const unmatched = state.merged.filter(s => s.matchType === 'unmatched');
   if (unmatched.length) {
     aoa.push([]);
-    aoa.push(['🔴 完全未配對名單 (新名冊中找不到此姓名)']);
-    aoa.push(['姓名', '族別', '語別', '舊班級', '舊座號']);
+    aoa.push(['─────────────────────────────────────────────────────────────']);
+    aoa.push([]);
+    aoa.push([`🔴 完全未配對名單 (${unmatched.length} 位) · 依舊班級分組,方便逐班核對`]);
+    aoa.push(['💡 建議:聯絡各班導師確認是否有轉學、改名,或檢查新名冊是否缺了此班的資料']);
+    aoa.push([]);
+
+    // 依舊班級分組
+    const byOldClass = {};
     for (const s of unmatched) {
-      aoa.push([s.rawName || s.name, s.tribe || '', s.language, s.oldClass, s.oldSeat]);
+      const c = s.oldClass || '(無班級)';
+      (byOldClass[c] = byOldClass[c] || []).push(s);
+    }
+    const oldClassKeys = Object.keys(byOldClass).sort((a, b) => a.localeCompare(b, 'zh-Hant'));
+
+    for (const cls of oldClassKeys) {
+      const list = byOldClass[cls].sort((a, b) => (parseInt(a.oldSeat) || 999) - (parseInt(b.oldSeat) || 999));
+      const teacher = list.find(s => s.teacher)?.teacher || '';
+      aoa.push([`── ${cls} (${list.length} 位)${teacher ? ' · 原任教師 ' + teacher : ''}`]);
+      aoa.push(['編號', '舊座號', '姓名', '族別', '選修語別']);
+      list.forEach((s, i) => {
+        aoa.push([i + 1, s.oldSeat, s.rawName || s.name, s.tribe || '', s.language || '']);
+      });
+      aoa.push([]);
     }
   }
+
+  // 疑似/多候選 區塊已在本函式前半段加入(避免重覆)
   const ws = XLSX.utils.aoa_to_sheet(aoa);
   ws['!cols'] = [{wch:8},{wch:10},{wch:12},{wch:10},{wch:12},{wch:10},{wch:14}];
   XLSX.utils.book_append_sheet(wb, ws, '新本土語名單');
@@ -4334,7 +4449,47 @@ function celebrateMatch() {
   }, 150);
 }
 
-// Hook into renderAlerts — when 100% matched (and not celebrated this session)
+// Low-match-rate warning modal (v2.6 優化 2)
+function showLowMatchWarning(rate, total, unmatched) {
+  const unmatchedByOldClass = {};
+  state.merged.filter(s => s.matchType === 'unmatched').forEach(s => {
+    unmatchedByOldClass[s.oldClass] = (unmatchedByOldClass[s.oldClass] || 0) + 1;
+  });
+  const classList = Object.entries(unmatchedByOldClass).sort()
+    .map(([cls, n]) => `<li><b>${escapeHtml(cls)}</b> — ${n} 位未配對</li>`).join('');
+  const newClasses = [...new Set(state.newRoster.map(s => s.newClass))].sort((a,b) => a.localeCompare(b, 'zh-Hant'));
+  const newClassList = newClasses.slice(0, 8).map(c => `<code>${escapeHtml(c)}</code>`).join(' · ');
+  const html = `
+    <h3 class="modal-title" style="color:var(--danger-dark)">⚠️ 配對成功率偏低</h3>
+    <p class="modal-sub">
+      只有 <b style="color:var(--danger-dark);font-size:18px">${rate.toFixed(1)}%</b>(${total - unmatched}/${total})的學生找到對應的新班級,未配對 <b>${unmatched}</b> 位。
+      匯出結果可能不完整。
+    </p>
+    <div style="padding:12px 16px;background:var(--surface-2);border-radius:var(--r-md);border:1px solid var(--border);margin-bottom:14px">
+      <div style="font-weight:700;font-size:13px;margin-bottom:8px">🔴 未配對分布(按舊班級)</div>
+      <ul style="margin:0;padding-left:20px;line-height:1.8;font-size:13px">${classList}</ul>
+    </div>
+    <div style="padding:12px 16px;background:var(--info-tint);border-radius:var(--r-md);border:1px solid var(--brand-200);margin-bottom:14px;font-size:13px">
+      <div style="font-weight:700;margin-bottom:6px">💡 可能原因</div>
+      <ol style="margin:0;padding-left:20px;line-height:1.7">
+        <li><b>新名冊只包含部分班級</b>(最常見)— 目前偵測到新名冊的班級:<br>${newClassList || '<span style="color:var(--text-subtle)">無</span>'}</li>
+        <li><b>姓名格式不一致</b>(如:舊名單含括號族別,新名冊只有清名 — 本工具會自動處理,但若差太多則無法配對)</li>
+        <li><b>班級命名格式系統不認得</b>(如:「3年甲班」而非「3年1班」)</li>
+      </ol>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-dismiss>我知道了,繼續作業</button>
+      <button class="btn btn-primary" data-reupload>🔄 重新上傳新名冊</button>
+    </div>`;
+  const m = openModal(html);
+  m.card.querySelector('[data-dismiss]').addEventListener('click', m.close);
+  m.card.querySelector('[data-reupload]').addEventListener('click', () => {
+    m.close();
+    $('newFile').click();
+  });
+}
+
+// Hook into renderAlerts — 100% 慶祝 + 低配對率警告
 const _origRenderAlerts = renderAlerts;
 renderAlerts = function() {
   _origRenderAlerts();
@@ -4343,13 +4498,24 @@ renderAlerts = function() {
   const unmatched = state.merged.filter(s => s.matchType === 'unmatched').length;
   const ambig = state.merged.filter(s => s.matchType === 'ambiguous').length;
   const rate = ((total - unmatched - ambig) / total * 100);
-  // Celebrate only on perfect matches + once per session per batch-size
+
+  // 🎉 100% 慶祝 — 每批次一次
   if (rate >= 100) {
     const celebKey = `celebrated_${total}_${state.newRoster.length}`;
     if (!sessionStorage.getItem(celebKey)) {
       sessionStorage.setItem(celebKey, '1');
       setTimeout(celebrateMatch, 300);
       toast('🎉 完美配對!全員 100% 都找到對象', 'success', 4000);
+    }
+    return;
+  }
+
+  // ⚠️ 低配對率警告 — 每次配對都檢查,但每種失敗組合只跳一次
+  if (rate < 50) {
+    const warnKey = `lowMatchWarned_${total}_${unmatched}`;
+    if (!sessionStorage.getItem(warnKey)) {
+      sessionStorage.setItem(warnKey, '1');
+      setTimeout(() => showLowMatchWarning(rate, total, unmatched), 500);
     }
   }
 };
