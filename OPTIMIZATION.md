@@ -1,10 +1,10 @@
 # 優化改良藍圖 & 進度總表
 
-> **版本:v2.2 · 最後更新:2026-04-21**
+> **版本:v2.5 · 最後更新:2026-04-21**
 >
 > 本文件記錄**已完成的里程碑**以及**未來優化路線圖**。依優先順序與開發難度分成 7 波,每項都有「為什麼做、怎麼做、預計工時」三要素。
 >
-> **目前進度:30 項功能 ✅ · 56 項規劃中 🚧**
+> **目前進度:39 項功能 ✅ · 47 項規劃中 🚧**
 
 ## 目錄
 
@@ -25,11 +25,11 @@
 
 | 指標 | 數值 | 備註 |
 |------|------|------|
-| 版本 | **v2.2** | |
-| 核心檔案 | `index.html` 134.7 KB | 單檔 HTML,含所有 CSS + JS |
+| 版本 | **v2.5** | |
+| 核心檔案 | `index.html` 165.2 KB | 單檔 HTML,含所有 CSS + JS |
 | 圖片資產 | 11 個檔 (340 KB) | favicon × 5、apple × 1、android × 2、og × 2、manifest |
-| 外部依賴 | `xlsx@0.18.5`(CDN)、Google Fonts `Noto Sans TC` | |
-| 已實作功能 | **30 項**(v1.0 → v2.2) | 見下 |
+| 外部依賴 | `xlsx@0.18.5`、`canvas-confetti@1.9.3`(CDN)、Google Fonts `Noto Sans TC` | |
+| 已實作功能 | **39 項**(v1.0 → v2.5) | 見下 |
 | 部署狀態 | ✅ 已上 GitHub Pages:<br/>`https://cagoooo.github.io/local/` | HTTPS enforced |
 | GitHub Repo | `cagoooo/local`(公開) | 已設 topics + description + homepage |
 | 瀏覽器支援 | 近 2 年版本的 Chrome/Edge/Firefox/Safari | backdrop-filter、color-mix 等需現代瀏覽器 |
@@ -100,7 +100,26 @@
 | 30 | **上傳後預覽 Modal(新名冊)** | 同上,並自動偵測重複姓名警示 banner · 多工作表時加 sheet 篩選 |
 | 🚀 | **GitHub Pages 正式上線** | `https://cagoooo.github.io/local/` · HTTPS 強制 · v2.1/v2.2 tags 齊全 |
 
-**累計 30 項功能已完成,第一波 🔴 與第二波 ⚡ 全數打勾,第三波部分完成。**
+### 🎨 v2.3 · 精緻化小品 · 5 項 · 2026-04-21
+
+| # | 項目 | 說明 |
+|---|------|------|
+| 31 | **Button ripple 漣漪效果** | 所有按鈕/icon/CTA 點擊後從點擊位置擴散的水波紋,符合 Material Design 手感 |
+| 32 | **Hover rich tooltip** | `data-tip` 深色氣泡(含小箭頭),內建快捷鍵提示 · 尊重 focus-visible |
+| 33 | **Skeleton loader** | 上傳中 dropzone 顯示 shimmer 骨架,告知使用者「正在處理」 |
+| 34 | **解析進度條** | 漸層進度條 + 流光動畫,多檔上傳時顯示 0→100% 進度與當前檔名 |
+| 35 | **100% 配對 confetti** | 配對成功率達 100% 時自動煙火慶祝(canvas-confetti),每批次僅一次 |
+
+### 🔍 v2.5 · 品質升級 · 4 項 · 2026-04-21
+
+| # | 項目 | 說明 |
+|---|------|------|
+| 36 | **資料完整性驗證 lint** | 5 種規則:座號重複、姓名長度異常、非中文字元、班級人數異常、座號跳號;綠色「✅ 檢查通過」chip 或警告 chip 點開顯示詳細 |
+| 37 | **格式自動修正建議** | 偵測前後/全形空白、全形數字、「斑/班」typo;預設全勾選 modal,使用者確認後套用 |
+| 38 | **班級語別人數視覺化** | 摘要報告內加入水平長條圖,依語別顏色堆疊,hover tooltip 顯示人數 |
+| 39 | **重複上傳偵測** | 加檔時 confirm 問「累加 / 取代」· 跳過重複記錄並提示「已跳過 N 筆重複」 |
+
+**累計 39 項功能已完成(5/5 第六波 + 4/4 資料品質),第一、二、六波全數打勾,第七波部分完成。**
 
 ---
 
@@ -1773,7 +1792,7 @@ function detectDuplicateUploads(newBatch, existing) {
 
 **先求有、再求好、最後才求完美**。
 
-已完成 **30 項**,還有 **56 項**藍圖。每完成一項回來打 ✅,年底再回頭看會很有成就感。
+已完成 **39 項**,還有 **47 項**藍圖。每完成一項回來打 ✅,年底再回頭看會很有成就感。
 
 ---
 
@@ -1785,7 +1804,9 @@ function detectDuplicateUploads(newBatch, existing) {
 | v1.1 | 2026-04-20 | 12 | 好用(範本 + 模糊比對 + 多檔) |
 | v2.0 | 2026-04-20 | 18 | 好看(設計系統 + 深色模式) |
 | v2.1 | 2026-04-20 | 27 | 完整(Toast + 快捷鍵 + favicon + OG) |
-| **v2.2** | **2026-04-21** | **30** | **透明**(預覽 Modal + CTA 升級) |
+| v2.2 | 2026-04-21 | 30 | 透明(預覽 Modal + CTA 升級) |
+| v2.3 | 2026-04-21 | 35 | 精緻(ripple / tooltip / skeleton / progress / confetti) |
+| **v2.5** | **2026-04-21** | **39** | **可靠**(資料驗證 / 格式修正 / 視覺化 / 防重複) |
 
 ---
 
@@ -1793,9 +1814,9 @@ function detectDuplicateUploads(newBatch, existing) {
 
 | 版本 | 預計內容 | 預計時程 |
 |------|---------|---------|
-| **v2.3** | 第一波小品 · Skeleton、confetti、tooltip、ripple | 2-3 小時 |
-| **v2.5** | 完成第三波:PWA SW + 手動編輯 + CSV 貼上 | 1 個月 |
-| **v3.0** | 完成大部分第三+四波:a11y + E2E + i18n | 3 個月 |
+| **v2.6** | PWA Service Worker · 讓瀏覽器可「安裝到桌面」當原生 APP | 2-3 小時 |
+| **v2.7** | 手動編輯單筆 + CSV 剪貼簿貼上 + URL 參數分享 | 一個週末 |
+| **v3.0** | 完整 WCAG 2.1 AA + Playwright E2E + i18n | 3 個月 |
 | **v4.0** | TypeScript 重構 + Web Workers + 虛擬捲動 | 暑假 |
 | **v5.0** | Supabase + LINE Bot + 跨年度 Dashboard | 隔年 |
 

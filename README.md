@@ -2,7 +2,7 @@
 
 > 小學升級分班後,自動更新本土語選修名單的網頁工具。上傳舊名單 + 新編班名冊,用「姓名」自動比對(含錯字模糊比對),即時產出更新後的班級/座號對照表與新本土語名單。
 
-![version](https://img.shields.io/badge/version-2.2-blueviolet) ![offline](https://img.shields.io/badge/offline-ready-green) ![stack](https://img.shields.io/badge/stack-Vanilla%20JS-yellow) ![darkmode](https://img.shields.io/badge/dark%20mode-✓-purple) ![a11y](https://img.shields.io/badge/a11y-WCAG%20AA-blue) ![social](https://img.shields.io/badge/OG%20image-✓-ff69b4) ![shortcuts](https://img.shields.io/badge/⌨️%20shortcuts-✓-lightgrey) ![preview](https://img.shields.io/badge/👁%20preview-✓-10b981) [![live](https://img.shields.io/badge/🌐%20live-cagoooo.github.io%2Flocal-0ea5e9)](https://cagoooo.github.io/local/)
+![version](https://img.shields.io/badge/version-2.5-blueviolet) ![offline](https://img.shields.io/badge/offline-ready-green) ![stack](https://img.shields.io/badge/stack-Vanilla%20JS-yellow) ![darkmode](https://img.shields.io/badge/dark%20mode-✓-purple) ![a11y](https://img.shields.io/badge/a11y-WCAG%20AA-blue) ![social](https://img.shields.io/badge/OG%20image-✓-ff69b4) ![shortcuts](https://img.shields.io/badge/⌨️%20shortcuts-✓-lightgrey) ![preview](https://img.shields.io/badge/👁%20preview-✓-10b981) [![live](https://img.shields.io/badge/🌐%20live-cagoooo.github.io%2Flocal-0ea5e9)](https://cagoooo.github.io/local/)
 
 ## 目錄
 
@@ -35,7 +35,30 @@
 
 ---
 
-## 🚀 v2.2 新增亮點(最新)
+## 🚀 v2.5 新增亮點(最新)
+
+**品質升級版** — 工具主動把關,減少人為失誤。
+
+| 🆕 | 項目 | 價值 |
+|:--:|------|------|
+| 🔍 | **資料完整性 lint** | 5 種自動檢查:座號重複 / 姓名異常 / 非中文字元 / 班級人數 / 座號跳號 |
+| 🔧 | **格式自動修正** | 偵測前後空白、全形數字、「斑/班」錯字 → 一鍵預覽修正 |
+| 📊 | **班級語別視覺化** | 摘要報告內水平長條圖,各班閩/客/族/新/手人數一目了然 |
+| 🔁 | **重複上傳偵測** | 「累加 vs 取代」確認 · 跳過重複記錄並提示 |
+
+## 🎨 v2.3 新增亮點
+
+**精緻化小品** — 手感、視覺、微互動全面升級。
+
+| 🆕 | 項目 | 價值 |
+|:--:|------|------|
+| 💧 | **Button ripple** | 按鈕點擊有漣漪擴散效果,符合 Material 手感 |
+| 💬 | **Rich tooltip** | 深色氣泡 + 快捷鍵提示,取代原生 title |
+| 💀 | **Skeleton loader** | 上傳中 dropzone 顯示 shimmer 骨架 |
+| 📊 | **解析進度條** | 漸層 + 流光動畫,多檔上傳時顯示 0→100% |
+| 🎉 | **100% confetti 慶祝** | 配對成功率 100% 時自動煙火 |
+
+## 🔎 v2.2 新增亮點
 
 讓使用者在配對前**先驗證解析結果正確性**,降低「早知道就…」的錯誤成本。
 
@@ -470,7 +493,9 @@ native-lang-matcher/
 
 | 版本 | 日期 | 功能數 | 主要變動 |
 |------|------|:-----:|---------|
-| **v2.2** | 2026-04-21 | **30** | 範本下載 CTA 資訊卡 + 上傳後預覽 Modal(舊名單 + 新名冊)+ GitHub Pages 正式上線 |
+| **v2.5** | 2026-04-21 | **39** | 品質升級:資料 lint、格式自動修正、班級視覺化、重複上傳偵測 |
+| **v2.3** | 2026-04-21 | 35 | 精緻化小品:ripple、tooltip、skeleton、progress bar、confetti |
+| **v2.2** | 2026-04-21 | 30 | 範本下載 CTA 資訊卡 + 上傳後預覽 Modal(舊名單 + 新名冊)+ GitHub Pages 正式上線 |
 | **v2.1** | 2026-04-20 | 27 | Toast、⌨️ 快捷鍵、重置、動畫計數、多候選 modal、列印模式、LocalStorage 記憶、摘要報告、favicon、OG 預覽圖 |
 | **v2.0** | 2026-04-20 | 18 | UI/UX 大升級(Noto Sans TC + Indigo 漸層 + 深色模式 + Stepper + Hero + 卡片格說明區) |
 | **v1.1** | 2026-04-20 | 12 | 高優先 4 項優化(範本下載、模糊比對、族別保留、多檔上傳) |
