@@ -41,6 +41,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
 <style>
   /* ==========================================================
      Design Tokens — Light
@@ -1497,6 +1498,358 @@
   #resultsSection { scroll-margin-top: 80px; }
 
   /* ==========================================================
+     Button ripple (v2.3 #21)
+     ========================================================== */
+  .btn, .icon-btn, .preview-btn-inline, .template-card, .template-card-cta {
+    position: relative;
+    overflow: hidden;
+  }
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: rippleExpand 600ms var(--ease-out);
+    background: rgba(255, 255, 255, 0.45);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .btn-ghost .ripple { background: rgba(99, 102, 241, 0.25); }
+  .icon-btn .ripple { background: rgba(99, 102, 241, 0.3); }
+  .template-card .ripple { background: rgba(99, 102, 241, 0.2); }
+  @keyframes rippleExpand {
+    to { transform: scale(4); opacity: 0; }
+  }
+  /* Ensure content stays above ripple */
+  .btn > *, .icon-btn > *, .preview-btn-inline > *, .template-card > * { position: relative; z-index: 1; }
+
+  /* ==========================================================
+     Rich tooltip (v2.3 #20)
+     ========================================================== */
+  [data-tip] { position: relative; }
+  [data-tip]::before, [data-tip]::after { pointer-events: none; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: var(--gray-900);
+    color: white;
+    padding: 7px 11px;
+    border-radius: var(--r-sm);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity var(--t-fast), transform var(--t-fast) var(--ease-out);
+    z-index: 100;
+    box-shadow: var(--shadow-lg);
+  }
+  [data-theme="dark"] [data-tip]::after { background: #f1f5f9; color: #0f172a; }
+  [data-tip]::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    border: 5px solid transparent;
+    border-top-color: var(--gray-900);
+    opacity: 0;
+    transition: opacity var(--t-fast), transform var(--t-fast) var(--ease-out);
+    z-index: 100;
+  }
+  [data-theme="dark"] [data-tip]::before { border-top-color: #f1f5f9; }
+  [data-tip]:hover::after, [data-tip]:focus-visible::after,
+  [data-tip]:hover::before, [data-tip]:focus-visible::before {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  [data-tip-pos="bottom"]::after {
+    bottom: auto; top: calc(100% + 10px);
+  }
+  [data-tip-pos="bottom"]::before {
+    bottom: auto; top: calc(100% + 4px);
+    border-top-color: transparent;
+    border-bottom-color: var(--gray-900);
+  }
+  [data-theme="dark"] [data-tip-pos="bottom"]::before { border-bottom-color: #f1f5f9; }
+  [data-tip] kbd {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 1px 5px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+
+  /* ==========================================================
+     Skeleton loader (v2.3 #17)
+     ========================================================== */
+  .skeleton-zone {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 20px;
+    width: 100%;
+  }
+  .skeleton {
+    background: linear-gradient(90deg,
+      var(--surface-2) 0%,
+      var(--surface-3) 50%,
+      var(--surface-2) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: var(--r-sm);
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .skeleton-line { height: 14px; }
+  .skeleton-line.lg { height: 22px; width: 60%; }
+  .skeleton-line.md { height: 16px; width: 85%; }
+  .skeleton-line.sm { height: 12px; width: 40%; }
+  .skeleton-circle {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+  }
+  .skeleton-row .skeleton-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  /* ==========================================================
+     Progress bar (v2.3 #18)
+     ========================================================== */
+  .progress {
+    position: relative;
+    width: 100%;
+    height: 36px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-full);
+    overflow: hidden;
+    margin: 14px 0;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .progress-bar {
+    height: 100%;
+    background: var(--grad-brand);
+    width: 0%;
+    transition: width 0.35s var(--ease-out);
+    position: relative;
+  }
+  .progress-bar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255,255,255,0.3) 50%,
+      transparent 100%);
+    animation: progressShine 1.8s linear infinite;
+  }
+  @keyframes progressShine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .progress-label {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    text-shadow: 0 0 8px var(--surface);
+    letter-spacing: 0.02em;
+  }
+
+  /* ==========================================================
+     Class balance chart (v2.5 #33)
+     ========================================================== */
+  .balance-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 4px 2px;
+  }
+  .balance-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 60px;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .balance-label {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .balance-bars {
+    display: flex;
+    height: 26px;
+    border-radius: var(--r-full);
+    overflow: hidden;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+  }
+  .balance-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 0;
+    cursor: help;
+    transition: filter var(--t-fast);
+    position: relative;
+  }
+  .balance-segment:hover { filter: brightness(1.1); }
+  .balance-segment.seg-閩 { background: #6366f1; }
+  .balance-segment.seg-客 { background: #d97706; }
+  .balance-segment.seg-族 { background: #dc2626; }
+  .balance-segment.seg-新 { background: #059669; }
+  .balance-segment.seg-手 { background: #7c3aed; }
+  .balance-segment.seg-other { background: var(--gray-500); }
+  .balance-total {
+    font-weight: 700;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .balance-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 12px;
+  }
+  .balance-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+  }
+  .balance-legend-item .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+
+  /* ==========================================================
+     Data lint banner (v2.5 #31)
+     ========================================================== */
+  .lint-banner {
+    margin: 0 24px 14px;
+    padding: 12px 16px;
+    background: var(--warning-tint);
+    border: 1px solid var(--warning-bg);
+    border-left: 4px solid var(--warning);
+    border-radius: var(--r-md);
+    font-size: 13.5px;
+    color: var(--warning-dark);
+  }
+  [data-theme="dark"] .lint-banner {
+    background: rgba(245,158,11,0.08);
+    border-color: rgba(245,158,11,0.3);
+    color: #fcd34d;
+  }
+  .lint-banner-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .lint-banner-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12.5px;
+  }
+  .lint-item {
+    display: flex;
+    gap: 8px;
+    line-height: 1.5;
+  }
+  .lint-item .sev {
+    flex-shrink: 0;
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+  .lint-item.severity-error .sev { background: var(--danger-bg); color: var(--danger-dark); }
+  .lint-item.severity-warning .sev { background: var(--warning-bg); color: var(--warning-dark); }
+  .lint-item.severity-info .sev { background: var(--info-bg); color: var(--brand-800); }
+  [data-theme="dark"] .lint-item.severity-error .sev { background: rgba(239,68,68,0.2); color: #fca5a5; }
+  [data-theme="dark"] .lint-item.severity-warning .sev { background: rgba(245,158,11,0.2); color: #fcd34d; }
+  [data-theme="dark"] .lint-item.severity-info .sev { background: rgba(99,102,241,0.2); color: var(--brand-300); }
+
+  .lint-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: var(--warning-bg);
+    color: var(--warning-dark);
+    border: 1px solid var(--warning);
+    border-radius: var(--r-full);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--t-fast);
+  }
+  [data-theme="dark"] .lint-chip {
+    background: rgba(245,158,11,0.15);
+    color: #fcd34d;
+    border-color: rgba(245,158,11,0.5);
+  }
+  .lint-chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .lint-chip.ok { background: var(--success-bg); color: var(--success-dark); border-color: var(--success); }
+  [data-theme="dark"] .lint-chip.ok { background: rgba(16,185,129,0.15); color: #6ee7b7; border-color: rgba(16,185,129,0.5); }
+
+  /* Fix suggestions diff table */
+  .fix-diff-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .fix-diff-table th, .fix-diff-table td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .fix-diff-table th { font-weight: 600; color: var(--text-muted); font-size: 12px; background: var(--surface-2); }
+  .fix-diff-table .old { color: var(--danger-dark); text-decoration: line-through; }
+  .fix-diff-table .new { color: var(--success-dark); font-weight: 600; }
+  [data-theme="dark"] .fix-diff-table .old { color: #fca5a5; }
+  [data-theme="dark"] .fix-diff-table .new { color: #6ee7b7; }
+  .fix-diff-table label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* ==========================================================
      Toast notifications
      ========================================================== */
   .toast-container {
@@ -1834,10 +2187,10 @@
     <span>本土語分班配對系統</span>
   </div>
   <div class="topnav-actions">
-    <button class="icon-btn" id="shortcutsBtn" title="鍵盤快捷鍵 (?)" aria-label="快捷鍵">⌨️</button>
-    <button class="icon-btn" id="helpToggle" title="使用說明" aria-label="使用說明">❓</button>
-    <button class="icon-btn" id="resetBtn" title="清除所有資料重新開始" aria-label="重置">🔄</button>
-    <button class="theme-toggle" id="themeToggle" title="切換深色/淺色模式 (Ctrl+D)" aria-label="切換深色/淺色模式">🌙</button>
+    <button class="icon-btn" id="shortcutsBtn" data-tip="鍵盤快捷鍵  ?" aria-label="快捷鍵">⌨️</button>
+    <button class="icon-btn" id="helpToggle" data-tip="使用說明" aria-label="使用說明">❓</button>
+    <button class="icon-btn" id="resetBtn" data-tip="清除所有資料重新開始" aria-label="重置">🔄</button>
+    <button class="theme-toggle" id="themeToggle" data-tip="切換深色/淺色模式  Ctrl+D" aria-label="切換深色/淺色模式">🌙</button>
   </div>
 </nav>
 
@@ -1899,6 +2252,10 @@
           <span class="count" id="oldPreviewCount">0</span>
         </button>
       </label>
+      <div class="progress" id="oldProgress" style="display:none">
+        <div class="progress-bar" id="oldProgressBar"></div>
+        <span class="progress-label" id="oldProgressLabel">正在解析…</span>
+      </div>
       <div class="stats" id="oldStats"></div>
     </div>
 
@@ -1940,6 +2297,10 @@
           <span class="count" id="newPreviewCount">0</span>
         </button>
       </label>
+      <div class="progress" id="newProgress" style="display:none">
+        <div class="progress-bar" id="newProgressBar"></div>
+        <span class="progress-label" id="newProgressLabel">正在解析…</span>
+      </div>
       <div class="stats" id="newStats"></div>
     </div>
   </div>
@@ -2062,10 +2423,10 @@
       <div class="results-header">
         <h2>📊 配對結果</h2>
         <div class="export-actions">
-          <button class="btn btn-ghost btn-sm" id="reportBtn" title="產生變動摘要報告">📋 摘要報告</button>
-          <button class="btn btn-ghost btn-sm" id="printBtn" title="列印目前檢視 (分班檢視效果較好)">🖨️ 列印</button>
-          <button class="btn btn-ghost" id="exportFlatBtn" title="Ctrl+E">匯出平面表</button>
-          <button class="btn btn-success" id="exportMatrixBtn" title="Ctrl+Shift+E">匯出新名單</button>
+          <button class="btn btn-ghost btn-sm" id="reportBtn" data-tip="產生變動摘要報告(含班級分布圖)">📋 摘要報告</button>
+          <button class="btn btn-ghost btn-sm" id="printBtn" data-tip="列印目前檢視  Ctrl+P">🖨️ 列印</button>
+          <button class="btn btn-ghost" id="exportFlatBtn" data-tip="匯出平面對照表  Ctrl+E">匯出平面表</button>
+          <button class="btn btn-success" id="exportMatrixBtn" data-tip="匯出依新班級分組的名單  Ctrl+⇧+E">匯出新名單</button>
         </div>
       </div>
 
@@ -3109,32 +3470,62 @@ function setupDropzone(zoneId, inputId, iconId, textId, fileNameId, kind) {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
-    // Reset accumulated state for this kind
-    if (kind === 'old') state.oldStudents = [];
-    else state.newRoster = [];
+    // Detect if user is adding more files to an existing batch
+    const hasExisting = kind === 'old' ? state.oldStudents.length : state.newRoster.length;
+    let wantsAppend = false;
+    if (hasExisting) {
+      wantsAppend = confirm(
+        `目前已有 ${hasExisting} 筆資料,這次上傳的要「累加」還是「取代」?\n\n` +
+        `確定 = 累加(保留原有資料,新增進去)\n` +
+        `取消 = 取代(清空原有資料,重新載入)`
+      );
+    }
+
+    // Reset accumulated state for this kind unless appending
+    if (!wantsAppend) {
+      if (kind === 'old') state.oldStudents = [];
+      else state.newRoster = [];
+    }
+    const existingRef = kind === 'old' ? state.oldStudents : state.newRoster;
+    const baselineArr = existingRef.slice();
+
+    // Show skeleton + progress
+    showSkeletonInDropzone(kind);
+    showParseProgress(kind, 0, '正在讀取檔案…');
 
     const fileInfos = [];
+    let dupeCount = 0;
     try {
-      for (const file of files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const baseProgress = (i / files.length) * 100;
+        showParseProgress(kind, baseProgress + 2, `讀取中 (${i + 1}/${files.length}):${file.name}`);
+        await new Promise(r => requestAnimationFrame(r));
         const data = await readFileAsArrayBuffer(file);
+        showParseProgress(kind, baseProgress + (100 / files.length) * 0.5, `解析中:${file.name}`);
+        await new Promise(r => requestAnimationFrame(r));
         const wb = XLSX.read(data, { type: 'array' });
-        if (kind === 'old') {
-          const before = state.oldStudents.length;
-          const parsed = parseOldWorkbook(wb);
-          state.oldStudents.push(...parsed);
-          fileInfos.push({ name: file.name, count: state.oldStudents.length - before });
-        } else {
-          const before = state.newRoster.length;
-          const parsed = parseNewRoster(wb);
-          state.newRoster.push(...parsed);
-          fileInfos.push({ name: file.name, count: state.newRoster.length - before });
-        }
+        let parsed;
+        if (kind === 'old') parsed = parseOldWorkbook(wb);
+        else parsed = parseNewRoster(wb);
+        // Deduplicate against what's already accumulated
+        const arr = kind === 'old' ? state.oldStudents : state.newRoster;
+        const dupResult = detectAndConfirmDuplicates(parsed, arr, kind);
+        if (dupResult.dupeCount) dupeCount += dupResult.dupeCount;
+        arr.push(...dupResult.accept);
+        fileInfos.push({ name: file.name, count: dupResult.accept.length });
+        showParseProgress(kind, (i + 1) / files.length * 100, `完成 ${i + 1}/${files.length}`);
       }
+      showParseProgress(kind, 100, '✓ 解析完成');
     } catch (err) {
       console.error(err);
+      hideParseProgress(kind);
+      clearSkeleton(kind);
       toast('讀取檔案時發生錯誤:' + err.message, 'error', 6000);
       return;
     }
+    hideParseProgress(kind);
+    clearSkeleton(kind);
 
     const total = kind === 'old' ? state.oldStudents.length : state.newRoster.length;
     if (total === 0) {
@@ -3144,7 +3535,29 @@ function setupDropzone(zoneId, inputId, iconId, textId, fileNameId, kind) {
       toast(hint, 'error', 7000);
       return;
     }
-    toast(`成功載入 ${total} 位學生(${files.length > 1 ? files.length + ' 個檔案' : files[0].name})`, 'success', 3500);
+    const dupeHint = dupeCount ? `,已跳過 ${dupeCount} 筆重複` : '';
+    toast(`成功載入 ${total} 位學生(${files.length > 1 ? files.length + ' 個檔案' : files[0].name})${dupeHint}`, 'success', 3500);
+
+    // Suggest auto-fix if any
+    const fieldMap = kind === 'old'
+      ? { name: 'name', class: 'oldClass', seat: 'oldSeat' }
+      : { name: 'name', class: 'newClass', seat: 'newSeat' };
+    const arr = kind === 'old' ? state.oldStudents : state.newRoster;
+    const fixes = suggestFixes(arr, fieldMap);
+    if (fixes.length) {
+      setTimeout(() => {
+        const t = toast(`🔧 偵測到 ${fixes.length} 個可自動修正的格式問題,點此檢視`, 'info', 8000);
+        if (t) {
+          t.style.cursor = 'pointer';
+          t.addEventListener('click', () => {
+            openFixModal(fixes, arr, kind);
+            t.click = null;
+            t.classList.add('leaving');
+            setTimeout(() => t.remove(), 300);
+          });
+        }
+      }, 800);
+    }
 
     // Update dropzone display
     $(iconId).textContent = '✅';
@@ -3880,6 +4293,423 @@ document.querySelectorAll('[data-preview]').forEach(btn => {
     else openNewPreview();
   });
 });
+
+// ============================================================
+// v2.3 #21 — Button ripple effect (event-delegated)
+// ============================================================
+document.addEventListener('click', e => {
+  const target = e.target.closest('.btn, .icon-btn, .preview-btn-inline, .template-card, .template-card-cta, .theme-toggle');
+  if (!target) return;
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  const rect = target.getBoundingClientRect();
+  const diameter = Math.max(rect.width, rect.height);
+  const radius = diameter / 2;
+  const circle = document.createElement('span');
+  circle.className = 'ripple';
+  circle.style.width = circle.style.height = diameter + 'px';
+  circle.style.left = (e.clientX - rect.left - radius) + 'px';
+  circle.style.top = (e.clientY - rect.top - radius) + 'px';
+  target.querySelectorAll('.ripple').forEach(r => r.remove());
+  target.appendChild(circle);
+  setTimeout(() => circle.remove(), 650);
+}, true);
+
+// ============================================================
+// v2.3 #19 — Confetti celebration on 100% match
+// ============================================================
+function celebrateMatch() {
+  if (typeof confetti !== 'function') return;
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  const colors = ['#6366f1', '#a855f7', '#10b981', '#f59e0b', '#ec4899'];
+  const duration = 2200;
+  const end = Date.now() + duration;
+  (function frame() {
+    confetti({ particleCount: 3, angle: 60, spread: 65, startVelocity: 50, origin: { x: 0, y: 0.7 }, colors });
+    confetti({ particleCount: 3, angle: 120, spread: 65, startVelocity: 50, origin: { x: 1, y: 0.7 }, colors });
+    if (Date.now() < end) requestAnimationFrame(frame);
+  })();
+  // Also a burst from the middle
+  setTimeout(() => {
+    confetti({ particleCount: 80, spread: 70, startVelocity: 45, origin: { x: 0.5, y: 0.55 }, colors });
+  }, 150);
+}
+
+// Hook into renderAlerts — when 100% matched (and not celebrated this session)
+const _origRenderAlerts = renderAlerts;
+renderAlerts = function() {
+  _origRenderAlerts();
+  const total = state.merged.length;
+  if (!total) return;
+  const unmatched = state.merged.filter(s => s.matchType === 'unmatched').length;
+  const ambig = state.merged.filter(s => s.matchType === 'ambiguous').length;
+  const rate = ((total - unmatched - ambig) / total * 100);
+  // Celebrate only on perfect matches + once per session per batch-size
+  if (rate >= 100) {
+    const celebKey = `celebrated_${total}_${state.newRoster.length}`;
+    if (!sessionStorage.getItem(celebKey)) {
+      sessionStorage.setItem(celebKey, '1');
+      setTimeout(celebrateMatch, 300);
+      toast('🎉 完美配對!全員 100% 都找到對象', 'success', 4000);
+    }
+  }
+};
+
+// ============================================================
+// v2.3 #17 + #18 — Skeleton loader + progress bar during parse
+// ============================================================
+function showParseProgress(kind, percent, label) {
+  const bar = $(kind + 'ProgressBar');
+  const wrap = $(kind + 'Progress');
+  const lbl = $(kind + 'ProgressLabel');
+  if (!bar) return;
+  wrap.style.display = 'block';
+  bar.style.width = Math.min(100, Math.max(0, percent)) + '%';
+  if (label) lbl.textContent = label;
+}
+function hideParseProgress(kind) {
+  const wrap = $(kind + 'Progress');
+  if (wrap) setTimeout(() => { wrap.style.display = 'none'; }, 400);
+}
+function showSkeletonInDropzone(kind) {
+  const zone = $(kind + 'Zone');
+  if (!zone) return;
+  // Mark that we're loading (don't remove existing label content; just overlay)
+  zone.dataset.parsing = '1';
+}
+function clearSkeleton(kind) {
+  const zone = $(kind + 'Zone');
+  if (zone) delete zone.dataset.parsing;
+}
+
+// ============================================================
+// v2.5 #34 — Duplicate upload detection
+// ============================================================
+function detectAndConfirmDuplicates(newBatch, existingArray, kind) {
+  if (!existingArray.length) return { accept: newBatch };
+  const keyOf = kind === 'old'
+    ? (s) => `${normalizeName(s.name)}_${s.oldClass}_${s.oldSeat}`
+    : (s) => `${normalizeName(s.name)}_${s.newClass}_${s.newSeat}`;
+  const existingKeys = new Set(existingArray.map(keyOf));
+  const dupes = newBatch.filter(s => existingKeys.has(keyOf(s)));
+  if (!dupes.length) return { accept: newBatch };
+  const uniques = newBatch.filter(s => !existingKeys.has(keyOf(s)));
+  const ok = confirm(
+    `偵測到 ${dupes.length} 筆與現有資料重複的記錄\n` +
+    `(如:${dupes.slice(0, 3).map(s => s.name).join('、')}${dupes.length > 3 ? '...' : ''})\n\n` +
+    `確定 = 僅加入 ${uniques.length} 筆新資料,跳過重複\n` +
+    `取消 = 全部加入(可能造成重複)`
+  );
+  return { accept: ok ? uniques : newBatch, dupeCount: dupes.length };
+}
+
+// ============================================================
+// v2.5 #31 — Data integrity lint
+// ============================================================
+function lintOldStudents(students) {
+  const issues = [];
+  // 1. Duplicate seats within the same class
+  const seatMap = new Map();
+  for (const s of students) {
+    const k = `${s.oldClass}_${s.oldSeat}`;
+    if (seatMap.has(k)) {
+      const prev = seatMap.get(k);
+      issues.push({ type: 'dup_seat', severity: 'error',
+        msg: `${s.oldClass} 座號 ${s.oldSeat} 重複:「${prev.name}」與「${s.name}」` });
+    }
+    seatMap.set(k, s);
+  }
+  // 2. Odd name length
+  const oddNames = students.filter(s => s.name.length < 2 || s.name.length > 5);
+  if (oddNames.length) {
+    issues.push({ type: 'odd_name', severity: 'warning',
+      msg: `${oddNames.length} 位姓名長度異常(${oddNames.slice(0, 3).map(s => s.name).join('、')})` });
+  }
+  // 3. Non-CJK in name
+  const nonCJK = students.filter(s => /[^\u4e00-\u9fff·‧・\s]/.test(s.name));
+  if (nonCJK.length) {
+    issues.push({ type: 'non_cjk', severity: 'warning',
+      msg: `${nonCJK.length} 位姓名含非中文字元(${nonCJK.slice(0, 3).map(s => s.name).join('、')}),可能是貼上時帶入雜訊` });
+  }
+  // 4. Class size check
+  const byClass = {};
+  students.forEach(s => byClass[s.oldClass] = (byClass[s.oldClass] || 0) + 1);
+  for (const [cls, n] of Object.entries(byClass)) {
+    if (n < 5) issues.push({ type: 'tiny_class', severity: 'info', msg: `${cls} 只有 ${n} 人,請確認是否資料不全` });
+    if (n > 35) issues.push({ type: 'huge_class', severity: 'warning', msg: `${cls} 有 ${n} 人,偏多(一般國小班級 25-32 人)` });
+  }
+  // 5. Seat gaps
+  for (const cls of Object.keys(byClass)) {
+    const seats = students.filter(s => s.oldClass === cls)
+      .map(s => parseInt(s.oldSeat)).filter(n => !isNaN(n)).sort((a, b) => a - b);
+    if (seats.length === 0) continue;
+    const missing = [];
+    for (let i = 1; i < seats[seats.length - 1]; i++) {
+      if (!seats.includes(i)) missing.push(i);
+    }
+    if (missing.length && missing.length <= 5) {
+      issues.push({ type: 'seat_gap', severity: 'info',
+        msg: `${cls} 缺座號:${missing.join(', ')}(可能是未選修本土語的學生)` });
+    }
+  }
+  return issues;
+}
+
+function lintNewRoster(students) {
+  const issues = [];
+  const nameMap = new Map();
+  for (const s of students) {
+    const k = normalizeName(s.name);
+    if (nameMap.has(k)) {
+      issues.push({ type: 'dup_name', severity: 'error',
+        msg: `姓名「${s.name}」重複(${nameMap.get(k).newClass}#${nameMap.get(k).newSeat} 與 ${s.newClass}#${s.newSeat})` });
+    }
+    nameMap.set(k, s);
+  }
+  const seatMap = new Map();
+  for (const s of students) {
+    const k = `${s.newClass}_${s.newSeat}`;
+    if (seatMap.has(k)) {
+      issues.push({ type: 'dup_seat', severity: 'error',
+        msg: `${s.newClass} 座號 ${s.newSeat} 重複:「${seatMap.get(k).name}」與「${s.name}」` });
+    }
+    seatMap.set(k, s);
+  }
+  const byClass = {};
+  students.forEach(s => byClass[s.newClass] = (byClass[s.newClass] || 0) + 1);
+  for (const [cls, n] of Object.entries(byClass)) {
+    if (n > 35) issues.push({ type: 'huge_class', severity: 'warning', msg: `${cls} 有 ${n} 人,偏多` });
+  }
+  return issues;
+}
+
+function renderLintChip(container, issues, kind) {
+  const existing = container.querySelector('.lint-chip');
+  if (existing) existing.remove();
+  if (!issues.length) {
+    const ok = document.createElement('button');
+    ok.type = 'button';
+    ok.className = 'lint-chip ok';
+    ok.innerHTML = '✅ 資料檢查通過';
+    ok.setAttribute('data-tip', '未偵測到任何資料異常');
+    container.appendChild(ok);
+    return;
+  }
+  const errs = issues.filter(i => i.severity === 'error').length;
+  const warns = issues.filter(i => i.severity === 'warning').length;
+  const infos = issues.filter(i => i.severity === 'info').length;
+  const chip = document.createElement('button');
+  chip.type = 'button';
+  chip.className = 'lint-chip';
+  const parts = [];
+  if (errs) parts.push(`🔴 ${errs}`);
+  if (warns) parts.push(`🟡 ${warns}`);
+  if (infos) parts.push(`🔵 ${infos}`);
+  chip.innerHTML = `⚠️ ${issues.length} 個提示 <span style="font-weight:500">(${parts.join(' ')})</span>`;
+  chip.setAttribute('data-tip', '點擊查看詳細');
+  chip.addEventListener('click', () => openLintModal(issues, kind));
+  container.appendChild(chip);
+}
+
+function openLintModal(issues, kind) {
+  const head = kind === 'old' ? '舊本土語名單' : '新編班名冊';
+  const grouped = { error: [], warning: [], info: [] };
+  issues.forEach(i => grouped[i.severity].push(i));
+  const section = (sev, label, ico) => {
+    if (!grouped[sev].length) return '';
+    return `<div style="margin-top:14px">
+      <div style="font-weight:700;margin-bottom:6px;font-size:13px">${ico} ${label} (${grouped[sev].length})</div>
+      ${grouped[sev].map(i => `<div class="lint-item severity-${i.severity}"><span class="sev">${sev.toUpperCase()}</span><span>${escapeHtml(i.msg)}</span></div>`).join('')}
+    </div>`;
+  };
+  const html = `
+    <h3 class="modal-title">🔍 ${head}資料檢查</h3>
+    <p class="modal-sub">共偵測到 <b>${issues.length}</b> 個提示,分 3 個嚴重程度。<b>紅色 (error)</b> 建議優先處理,<b>藍色 (info)</b> 僅供參考。</p>
+    ${section('error', '錯誤 · 建議修正', '🔴')}
+    ${section('warning', '警告 · 請確認', '🟡')}
+    ${section('info', '資訊 · 提醒', '🔵')}
+    <div class="modal-actions">
+      <button class="btn btn-primary" data-close>我知道了</button>
+    </div>`;
+  const m = openModal(html);
+  m.card.querySelector('[data-close]').addEventListener('click', m.close);
+}
+
+// Run lint after each successful parse — hook into renderStats
+const _origRenderStatsForLint = renderStats;
+renderStats = function() {
+  _origRenderStatsForLint();
+  if (state.oldStudents.length) {
+    const issues = lintOldStudents(state.oldStudents);
+    renderLintChip($('oldStats'), issues, 'old');
+  }
+  if (state.newRoster.length) {
+    const issues = lintNewRoster(state.newRoster);
+    renderLintChip($('newStats'), issues, 'new');
+  }
+};
+
+// ============================================================
+// v2.5 #32 — Format auto-fix suggestions
+// ============================================================
+function suggestFixes(students, fieldMap) {
+  // fieldMap: { name: 'name', class: 'oldClass' | 'newClass', seat: 'oldSeat' | 'newSeat' }
+  const fixes = [];
+  students.forEach((s, idx) => {
+    const n = s[fieldMap.name];
+    const c = s[fieldMap.class];
+    const z = s[fieldMap.seat];
+    // Trim
+    if (typeof n === 'string' && n !== n.trim()) {
+      fixes.push({ idx, field: fieldMap.name, current: n, suggested: n.trim(), reason: '去除前後空白' });
+    }
+    // Full-width space
+    if (typeof n === 'string' && /　/.test(n)) {
+      fixes.push({ idx, field: fieldMap.name, current: n, suggested: n.replace(/　/g, ''), reason: '去除全形空白' });
+    }
+    // Full-width digits in class
+    if (typeof c === 'string' && /[０-９]/.test(c)) {
+      fixes.push({ idx, field: fieldMap.class, current: c,
+        suggested: c.replace(/[０-９]/g, d => String.fromCharCode(d.charCodeAt(0) - 0xFEE0)),
+        reason: '全形數字轉半形' });
+    }
+    // 斑 typo
+    if (typeof c === 'string' && /\d+年\d+斑/.test(c)) {
+      fixes.push({ idx, field: fieldMap.class, current: c, suggested: c.replace('斑', '班'), reason: '「斑」→「班」' });
+    }
+    // Seat with full-width digits
+    if (typeof z === 'string' && /[０-９]/.test(z)) {
+      fixes.push({ idx, field: fieldMap.seat, current: z,
+        suggested: z.replace(/[０-９]/g, d => String.fromCharCode(d.charCodeAt(0) - 0xFEE0)),
+        reason: '座號全形數字轉半形' });
+    }
+  });
+  return fixes;
+}
+
+function openFixModal(fixes, students, kind) {
+  if (!fixes.length) { toast('沒有需要修正的格式', 'success'); return; }
+  const rows = fixes.map((f, i) => `
+    <tr>
+      <td><label><input type="checkbox" checked data-fix-idx="${i}"></label></td>
+      <td style="color:var(--text-subtle);font-size:12px">${escapeHtml(students[f.idx].name)}</td>
+      <td class="old">${escapeHtml(f.current)}</td>
+      <td class="new">${escapeHtml(f.suggested)}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${escapeHtml(f.reason)}</td>
+    </tr>`).join('');
+  const html = `
+    <h3 class="modal-title">🔧 格式自動修正建議</h3>
+    <p class="modal-sub">偵測到 <b>${fixes.length}</b> 個可自動修正的格式問題。預設全選,請確認後套用。</p>
+    <div style="max-height:300px;overflow:auto;border:1px solid var(--border);border-radius:var(--r-md)">
+      <table class="fix-diff-table">
+        <thead><tr><th style="width:36px"></th><th>姓名</th><th>原值</th><th>修正後</th><th>原因</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-cancel>取消</button>
+      <button class="btn btn-primary" data-apply>套用勾選項目</button>
+    </div>`;
+  const m = openModal(html);
+  m.card.style.maxWidth = '680px';
+  m.card.querySelector('[data-cancel]').addEventListener('click', m.close);
+  m.card.querySelector('[data-apply]').addEventListener('click', () => {
+    const checked = [...m.card.querySelectorAll('input[data-fix-idx]:checked')].map(cb => parseInt(cb.dataset.fixIdx));
+    let applied = 0;
+    for (const i of checked) {
+      const f = fixes[i];
+      students[f.idx][f.field] = f.suggested;
+      applied++;
+    }
+    m.close();
+    if (applied) {
+      saveState();
+      toast(`已套用 ${applied} 個修正`, 'success');
+      if (state.oldStudents.length && state.newRoster.length) {
+        doMatch();
+        populateFilters();
+        renderAlerts();
+        renderTable();
+      }
+      renderStats();
+    }
+  });
+}
+
+// ============================================================
+// v2.5 #33 — Class balance chart (integrated into summary report)
+// ============================================================
+function renderBalanceChart(merged) {
+  if (!merged.length) return '';
+  const byClassLang = {};  // { className: { 閩語: 15, 客語: 6, ... }, ... }
+  for (const s of merged) {
+    if (!s.matched) continue;
+    const cls = s.newClass;
+    const lang = languageCategory(s.language);
+    byClassLang[cls] = byClassLang[cls] || {};
+    byClassLang[cls][lang] = (byClassLang[cls][lang] || 0) + 1;
+  }
+  const classes = Object.keys(byClassLang).sort((a, b) => a.localeCompare(b, 'zh-Hant'));
+  if (!classes.length) return '<p style="color:var(--text-subtle);font-size:13px">尚無配對成功的學生</p>';
+  const maxTotal = Math.max(...classes.map(c => Object.values(byClassLang[c]).reduce((s, n) => s + n, 0)));
+  const langOrder = ['閩語', '客語', '族語', '新住民語', '手語', '台灣手語', '其他'];
+  const segClass = { '閩語': 'seg-閩', '客語': 'seg-客', '族語': 'seg-族', '新住民語': 'seg-新', '手語': 'seg-手', '台灣手語': 'seg-手', '其他': 'seg-other' };
+
+  const rows = classes.map(cls => {
+    const data = byClassLang[cls];
+    const total = Object.values(data).reduce((s, n) => s + n, 0);
+    const widthPct = (total / maxTotal) * 100;
+    const segments = langOrder
+      .filter(l => data[l])
+      .map(l => {
+        const n = data[l];
+        const segWidth = (n / total) * 100;
+        return `<div class="balance-segment ${segClass[l]}" style="flex:${n}" title="${l} ${n} 人">${segWidth >= 10 ? `${l.slice(0,1)} ${n}` : ''}</div>`;
+      }).join('');
+    return `<div class="balance-row">
+      <span class="balance-label">${escapeHtml(cls)}</span>
+      <div class="balance-bars" style="width:${widthPct}%">${segments}</div>
+      <span class="balance-total">${total}</span>
+    </div>`;
+  }).join('');
+
+  const legend = ['閩語', '客語', '族語', '新住民語', '手語'].map(l =>
+    `<span class="balance-legend-item"><span class="dot ${segClass[l]}" style="background:var(--${segClass[l] === 'seg-閩' ? 'brand-500' : ''})"></span>${l}</span>`
+  ).join('');
+
+  return `
+    <div class="balance-chart">${rows}</div>
+    <div class="balance-legend">
+      <span class="balance-legend-item"><span class="dot" style="background:#6366f1"></span>閩語</span>
+      <span class="balance-legend-item"><span class="dot" style="background:#d97706"></span>客語</span>
+      <span class="balance-legend-item"><span class="dot" style="background:#dc2626"></span>族語</span>
+      <span class="balance-legend-item"><span class="dot" style="background:#059669"></span>新住民語</span>
+      <span class="balance-legend-item"><span class="dot" style="background:#7c3aed"></span>手語</span>
+    </div>`;
+}
+
+// Monkey-patch generateSummary to include chart
+const _origGenerateSummary = generateSummary;
+generateSummary = function() {
+  _origGenerateSummary();
+  // Inject chart into the open modal after render
+  setTimeout(() => {
+    const modal = document.querySelector('.modal-backdrop:last-of-type .modal-card');
+    if (!modal) return;
+    const chartHtml = renderBalanceChart(state.merged);
+    if (!chartHtml) return;
+    const section = document.createElement('div');
+    section.className = 'summary-section';
+    section.innerHTML = `<h4>📊 各班語別人數分布</h4>${chartHtml}`;
+    const langSection = [...modal.querySelectorAll('.summary-section')].find(s => s.querySelector('h4')?.textContent.includes('語別分布'));
+    if (langSection) langSection.before(section); else modal.querySelector('.modal-actions').before(section);
+  }, 30);
+};
+
+// ============================================================
+// Attach fix button to lint banner (invoke suggestFixes modal)
+// ============================================================
+// Expose helpers globally for debugging & future hooks
+window._lint = { lintOldStudents, lintNewRoster, suggestFixes, openFixModal };
 
 // Update preview button visibility + count when state changes
 // Hook into renderStats (already chained earlier)
