@@ -2237,14 +2237,16 @@
     <div class="card step-card" id="card1">
       <h2><span class="step-num">1</span>上傳舊本土語名單 <small>升級前</small></h2>
       <p class="hint">
-        目前 2→3 或 4→5 年級的本土語選修名單 Excel 檔。
+        目前 2→3 或 4→5 年級的本土語選修名單。<b>兩種排版都能讀</b>:校內慣用的
+        「班級:／語別:／編號」矩陣表,或校務系統匯出的「一列一位學生」表格
+        (需有<b>姓名</b>,加上<b>語別</b>或<b>班級</b>其中一欄)。
         <b>可一次選取多個檔案</b>(例如同時處理三年級與五年級,結果自動合併)。
       </p>
       <label class="dropzone" id="oldZone">
-        <input type="file" id="oldFile" accept=".xlsx,.xls" multiple />
+        <input type="file" id="oldFile" accept=".xlsx,.xls,.xlsm,.xlsb,.ods,.csv,.tsv,.txt" multiple />
         <span class="dropzone-icon" id="oldIcon">📋</span>
         <div class="dropzone-text" id="oldText">點擊或拖曳上傳</div>
-        <div class="dropzone-hint">支援 .xlsx / .xls・可多選</div>
+        <div class="dropzone-hint">支援 .xlsx / .xls / .xlsm / .ods / .csv・可多選</div>
         <div class="dropzone-file" id="oldFileName"></div>
         <button type="button" class="preview-btn-inline" id="oldPreviewBtn" style="display:none" data-preview="old">
           <span class="eye">👁</span>
@@ -2263,7 +2265,7 @@
     <div class="card step-card" id="card2">
       <h2><span class="step-num">2</span>上傳新編班名冊 <small>升級後</small></h2>
       <p class="hint">
-        升級後的新班級名冊,需包含欄位:<b>姓名、新班級、新座號</b>。
+        升級後的新班級名冊,需包含欄位:<b>姓名、新班級</b>(新座號可留空)。
         欄位名稱可為「班級/新班級/班別」等變體,系統自動偵測。
       </p>
       <button class="template-card" id="downloadTemplate" type="button" aria-label="下載新名冊範本 Excel 檔">
@@ -2286,10 +2288,10 @@
         </span>
       </button>
       <label class="dropzone" id="newZone">
-        <input type="file" id="newFile" accept=".xlsx,.xls" multiple />
+        <input type="file" id="newFile" accept=".xlsx,.xls,.xlsm,.xlsb,.ods,.csv,.tsv,.txt" multiple />
         <span class="dropzone-icon" id="newIcon">📝</span>
         <div class="dropzone-text" id="newText">點擊或拖曳上傳</div>
-        <div class="dropzone-hint">支援 .xlsx / .xls・可多選</div>
+        <div class="dropzone-hint">支援 .xlsx / .xls / .xlsm / .ods / .csv・可多選</div>
         <div class="dropzone-file" id="newFileName"></div>
         <button type="button" class="preview-btn-inline" id="newPreviewBtn" style="display:none" data-preview="new">
           <span class="eye">👁</span>
@@ -2315,7 +2317,8 @@
           <span class="ico">📋</span>新名冊欄位需求
         </h3>
         <p class="help-section-sub">
-          新編班名冊只需要這 <b>3 個必要欄位</b>,多個工作表也會自動合併處理。欄位名稱寬鬆偵測,不必強求命名。
+          新編班名冊只需要 <b>姓名 + 班級</b> 兩欄(座號留空也讀得到,只是匯出時該欄空白),
+          多個工作表也會自動合併處理。欄位名稱寬鬆偵測,不必強求命名。
         </p>
 
         <table class="sample-table">
@@ -2355,6 +2358,24 @@
               <span class="code-chip">新座號</span>
               <span class="code-chip">座號</span>
               <span class="code-chip">號碼</span>
+              <span class="code-chip">(可省略)</span>
+            </div>
+          </div>
+          <div class="field-alias">
+            <div class="field-alias-label">🗣️ 語別欄<small>(舊名單用)</small></div>
+            <div class="field-alias-values">
+              <span class="code-chip">選擇語別</span>
+              <span class="code-chip">選修語別</span>
+              <span class="code-chip">語別</span>
+              <span class="code-chip">本土語言</span>
+            </div>
+          </div>
+          <div class="field-alias">
+            <div class="field-alias-label">🌿 族別欄<small>(選填)</small></div>
+            <div class="field-alias-values">
+              <span class="code-chip">族別</span>
+              <span class="code-chip">族群</span>
+              <span class="code-chip">姓名括號內</span>
             </div>
           </div>
         </div>
@@ -2366,7 +2387,7 @@
           <span class="ico">⚡</span>進階功能
         </h3>
         <p class="help-section-sub">
-          系統內建 6 項智慧處理能力,處理實務上最常見的資料狀況。
+          系統內建 8 項智慧處理能力,處理實務上最常見的資料狀況。
         </p>
 
         <div class="feat-grid">
@@ -2374,6 +2395,23 @@
             <div class="feat-card-title"><span class="ico">📚</span>多檔同時上傳</div>
             <p class="feat-card-desc">
               Step 1 / Step 2 都支援一次選多個檔案,例如三年級與五年級同時處理,系統自動累計合併。
+            </p>
+          </div>
+
+          <div class="feat-card feat-card--info">
+            <div class="feat-card-title"><span class="ico">📄</span>多種檔案格式</div>
+            <p class="feat-card-desc">
+              <code>.xlsx</code> <code>.xls</code> <code>.xlsm</code> <code>.xlsb</code>
+              <code>.ods</code> <code>.csv</code> <code>.tsv</code> 都能直接丟進來;
+              CSV 自動辨識 <b>UTF-8 / Big5</b> 編碼,不用先另存新檔。
+            </p>
+          </div>
+
+          <div class="feat-card feat-card--success">
+            <div class="feat-card-title"><span class="ico">🗣️</span>方言名自動歸類</div>
+            <p class="feat-card-desc">
+              「四縣腔」「賽考利克泰雅語」「郡群布農語」「緬甸語」這類直接寫方言名的欄位,
+              會自動歸到 <b>閩語 / 客語 / 族語 / 新住民語 / 手語</b>,匯出分欄與統計才不會全變「其他」。
             </p>
           </div>
 
@@ -2570,24 +2608,36 @@ function normalizeSeat(s) {
   return v;
 }
 
+// 語別辨識規則:校務系統匯出的「選擇語別」常直接寫方言名(四縣腔、賽考利克
+// 泰雅語、郡群布農語…),字面上不含「客」「族」二字,故需完整詞庫比對。
+// 涵蓋閩南語、客語 6 腔、原住民族語 16 族 42 方言、新住民語 7 國、臺灣手語。
+// 順序有意義:手語 → 客語 → 族語 → 新住民語 → 閩語(避免「泰雅」被當「泰語」、
+// 「閩南語」被當「南勢阿美語」之類的誤判)。
+const LANG_RULES = [
+  { cat: '手語', re: /手語/ },
+  { cat: '客語', re: /客語|客家|客話|四縣|海陸|大埔|饒平|詔安/ },
+  { cat: '族語', re: /族語|原住民|泰雅|賽夏|布農|鄒語|鄒族|卡那卡那富|拉阿魯哇|排灣|魯凱|卑南|阿美|達悟|雅美|邵語|噶瑪蘭|太魯閣|撒奇萊雅|賽德克|賽考利克|澤敖利|汶水|萬大|四季|卓群|卡群|丹群|巒群|郡群|霧台|大武|多納|茂林|萬山|南王|知本|初鹿|建和|南勢|秀姑巒|海岸|馬蘭|恆春|都達|德固達雅|德鹿谷/ },
+  { cat: '新住民語', re: /新住民|越南|印尼|泰國|泰語|緬甸|柬埔寨|菲律賓|菲語|馬來/ },
+  { cat: '閩語', re: /閩|台語|臺語|馬祖/ }
+];
+
 function languageCategory(langRaw) {
   const s = String(langRaw || '');
-  if (s.includes('閩')) return '閩語';
-  if (s.includes('客')) return '客語';
-  if (s.includes('族')) return '族語';
-  if (s.includes('新住民') || s.includes('越南') || s.includes('泰語') || s.includes('印尼') || s.includes('柬埔寨')) return '新住民語';
-  if (s.includes('手語')) return '手語';
+  if (!s.trim()) return '其他';
+  for (const rule of LANG_RULES) {
+    if (rule.re.test(s)) return rule.cat;
+  }
   return '其他';
 }
 
+const TAG_CLASS_BY_CAT = {
+  '閩語': 'tag-閩', '客語': 'tag-客', '族語': 'tag-族',
+  '新住民語': 'tag-新', '手語': 'tag-手', '其他': 'tag-other'
+};
+
 function langTagClass(lang) {
   if (!lang) return 'tag-other';
-  if (lang.includes('閩')) return 'tag-閩';
-  if (lang.includes('客')) return 'tag-客';
-  if (lang.includes('族')) return 'tag-族';
-  if (lang.includes('新住民')) return 'tag-新';
-  if (lang.includes('手語')) return 'tag-手';
-  return 'tag-other';
+  return TAG_CLASS_BY_CAT[languageCategory(lang)] || 'tag-other';
 }
 
 function levenshtein(a, b) {
@@ -2611,12 +2661,130 @@ function levenshtein(a, b) {
 // ============================================================
 // Old Native Language List Parser (matrix format)
 // ============================================================
+// 解析失敗時,把各工作表偵測到的表頭記下來,錯誤提示可以直接告訴使用者
+// 「我看到的欄位是這些」,比叫他自己猜格式有用得多。
+let lastHeaderSamples = [];
+
+function collectHeaderSample(grid, sheetName) {
+  const cells = [];
+  for (let r = 0; r < Math.min(grid.length, 8); r++) {
+    for (const v of (grid[r] || [])) {
+      const s = String(v || '').trim();
+      if (s && s.length <= 12 && !cells.includes(s)) cells.push(s);
+      if (cells.length >= 12) break;
+    }
+    if (cells.length >= 12) break;
+  }
+  if (cells.length) lastHeaderSamples.push({ sheet: sheetName, cells });
+}
+
+// 表頭同義詞。陣列順序 = 優先度(精確比對排前面,避免「新班級」被「班級」搶走)
+const HEADER_PATTERNS = {
+  name:    [/^(學生)?姓名$/, /^名字$/, /^學生$/, /姓名/],
+  lang:    [/^(選擇|選修|修習|就讀)?語別$/, /^本土語[言文別]?$/, /本土語/, /語言別/, /語別/, /^語系$/],
+  class:   [/^新班級$/, /^原班級$/, /^舊班級$/, /^班級$/, /^班別$/, /^年班$/, /班級/, /班別/],
+  seat:    [/^新座號$/, /^原座號$/, /^舊座號$/, /^座號$/, /^號碼$/, /^座位號$/, /座號/],
+  teacher: [/^(導師|班導|教師|老師|任課教師)$/, /導師/, /教師/],
+  tribe:   [/^族別$/, /^族群$/, /^身分別$/, /族別/]
+};
+
+// 在前 30 列裡找表頭,回傳 { row, cols:{name,lang,class,seat,teacher,tribe} }
+function findHeaderRow(grid, requiredKeys) {
+  const keys = Object.keys(HEADER_PATTERNS);
+  for (let r = 0; r < Math.min(grid.length, 30); r++) {
+    const row = grid[r] || [];
+    const cells = row.map(v => String(v || '').trim());
+    const cols = {};
+    const taken = new Set();
+    for (const key of keys) {
+      for (const pat of HEADER_PATTERNS[key]) {
+        const idx = cells.findIndex((cell, c) => cell && !taken.has(c) && pat.test(cell));
+        if (idx !== -1) { cols[key] = idx; taken.add(idx); break; }
+      }
+    }
+    if (requiredKeys.every(k => cols[k] !== undefined)) return { row: r, cols };
+  }
+  return null;
+}
+
+function extractTribe(rawName) {
+  return (String(rawName || '').match(/[(（]([^)）]+)[)）]/) || [])[1] || '';
+}
+
 function parseOldWorkbook(wb) {
   const out = [];
+  lastHeaderSamples = [];
   for (const sheetName of wb.SheetNames) {
     const ws = wb.Sheets[sheetName];
     const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+    if (!grid.length) continue;
+
+    // 格式 A:矩陣式(班級:○ / 語別:閩語8 / 編號 座號 姓名 …),校內既有名單
+    const before = out.length;
     parseOldSheet(grid, out);
+    if (out.length > before) continue;
+
+    // 格式 B:一列一位學生的表格(姓名 / 選擇語別 / 班級 / 座號),校務系統匯出
+    const simple = trySimpleOldList(grid, sheetName);
+    if (simple.length) { out.push(...simple); continue; }
+
+    // 格式 C:班級標題 + 座號/姓名 直欄(語別留空,可事後在預覽中確認)
+    const matrix = tryMatrixRoster(grid, sheetName);
+    if (matrix.length) {
+      out.push(...matrix.map(s => ({
+        name: s.name, rawName: s.rawName,
+        oldClass: s.newClass, oldSeat: s.newSeat,
+        teacher: '', language: '', tribe: extractTribe(s.rawName)
+      })));
+      continue;
+    }
+
+    collectHeaderSample(grid, sheetName);
+  }
+  return out;
+}
+
+// 格式 B:一列一位學生。至少要有「姓名」,加上「語別」或「班級+座號」其一。
+function trySimpleOldList(grid, sheetName) {
+  const out = [];
+  const found = findHeaderRow(grid, ['name', 'lang']) || findHeaderRow(grid, ['name', 'class']);
+  if (!found) return out;
+  const { row: headerRow, cols } = found;
+  if (cols.lang === undefined && (cols.class === undefined || cols.seat === undefined)) return out;
+
+  const cell = (row, idx) => idx === undefined ? '' : String(row[idx] || '').trim();
+  // 班級可能只寫在該班第一列(合併儲存格或人工留白),往下沿用上一個非空值
+  let lastClass = '', lastTeacher = '';
+
+  for (let r = headerRow + 1; r < grid.length; r++) {
+    const row = grid[r] || [];
+    const nameRaw = cell(row, cols.name);
+    if (!nameRaw) continue;
+    if (/^(姓名|小計|合計|總計|總人數|備註)/.test(nameRaw)) continue;
+    if (!/[一-鿿]/.test(nameRaw)) continue;
+    if (looksLikeClassroom(nameRaw)) continue;
+
+    const clsRaw = cell(row, cols.class);
+    if (clsRaw) lastClass = normalizeClass(clsRaw);
+    const teacherRaw = cell(row, cols.teacher);
+    if (teacherRaw) lastTeacher = teacherRaw;
+
+    const language = cell(row, cols.lang);
+    const tribeCol = cell(row, cols.tribe);
+    // 族別欄 → 姓名括號 → 語別本身若是族語/新住民方言名(如「賽考利克泰雅語」)
+    let tribe = tribeCol || extractTribe(nameRaw);
+    if (!tribe && ['族語', '新住民語'].includes(languageCategory(language))) tribe = language;
+
+    out.push({
+      name: nameRaw.replace(/[(（].*?[)）]/g, '').trim(),
+      rawName: nameRaw,
+      oldClass: lastClass,
+      oldSeat: normalizeSeat(cell(row, cols.seat)),
+      teacher: lastTeacher,
+      language,
+      tribe,
+      sheet: sheetName
+    });
   }
   return out;
 }
@@ -2807,8 +2975,7 @@ function extractLanguages(content) {
     { re: /客語\d*/, name: '客語' },
     { re: /族語\d*/, name: '族語' },
     { re: /新住民\d*/, name: '新住民語' },
-    { re: /手語\d*/, name: '手語' },
-    { re: /台灣手語\d*/, name: '台灣手語' }
+    { re: /手語\d*/, name: '手語' }
   ];
   for (const p of patterns) {
     if (p.re.test(s)) results.push(p.name);
@@ -2821,12 +2988,13 @@ function extractLanguages(content) {
 // ============================================================
 function parseNewRoster(wb) {
   const result = [];
+  lastHeaderSamples = [];
   for (const sheetName of wb.SheetNames) {
     const ws = wb.Sheets[sheetName];
     const grid = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
     if (!grid.length) continue;
 
-    // Try the SIMPLE format first: find a header row with "姓名" and "班級" and "座號"
+    // Try the SIMPLE format first: find a header row with "姓名" and "班級"(座號可缺)
     const simple = trySimpleRoster(grid, sheetName);
     if (simple.length) {
       result.push(...simple);
@@ -2839,46 +3007,34 @@ function parseNewRoster(wb) {
       result.push(...matrix);
       continue;
     }
+
+    collectHeaderSample(grid, sheetName);
   }
   return result;
 }
 
+// 只要有「姓名 + 班級」就收;座號缺漏不再讓整份判定失敗(有些名冊靠排序不寫座號)
 function trySimpleRoster(grid, sheetName) {
   const out = [];
-  // Find header row
-  let headerRow = -1;
-  let nameCol = -1, classCol = -1, seatCol = -1;
-  const classPatterns = [/新班級/, /^班級$/, /^班別$/, /班級$/];
-  const seatPatterns = [/新座號/, /^座號$/, /^號碼$/, /座號$/];
-  const namePatterns = [/學生姓名/, /^姓名$/, /姓名$/];
-
-  for (let r = 0; r < Math.min(grid.length, 30); r++) {
-    const row = grid[r] || [];
-    let nC = -1, cC = -1, sC = -1;
-    for (let c = 0; c < row.length; c++) {
-      const cell = String(row[c] || '').trim();
-      if (nC === -1 && namePatterns.some(p => p.test(cell))) nC = c;
-      if (cC === -1 && classPatterns.some(p => p.test(cell))) cC = c;
-      if (sC === -1 && seatPatterns.some(p => p.test(cell))) sC = c;
-    }
-    if (nC !== -1 && cC !== -1 && sC !== -1) {
-      headerRow = r; nameCol = nC; classCol = cC; seatCol = sC;
-      break;
-    }
-  }
-  if (headerRow === -1) return out;
+  const found = findHeaderRow(grid, ['name', 'class']);
+  if (!found) return out;
+  const { row: headerRow, cols } = found;
+  const cell = (row, idx) => idx === undefined ? '' : String(row[idx] || '').trim();
+  let lastClass = '';
 
   for (let r = headerRow + 1; r < grid.length; r++) {
     const row = grid[r] || [];
-    const name = String(row[nameCol] || '').trim();
-    const cls = String(row[classCol] || '').trim();
-    const seat = String(row[seatCol] || '').trim();
-    if (!name || !/[\u4e00-\u9fff]/.test(name)) continue;
+    const name = cell(row, cols.name);
+    if (!name || !/[一-鿿]/.test(name)) continue;
+    if (/^(姓名|小計|合計|總計|總人數|備註)/.test(name)) continue;
+    if (looksLikeClassroom(name)) continue;
+    const clsRaw = cell(row, cols.class);
+    if (clsRaw) lastClass = normalizeClass(clsRaw);
     out.push({
-      name: name.replace(/\(.*?\)/g, '').trim(),
+      name: name.replace(/[(（].*?[)）]/g, '').trim(),
       rawName: name,
-      newClass: normalizeClass(cls),
-      newSeat: normalizeSeat(seat),
+      newClass: lastClass,
+      newSeat: normalizeSeat(cell(row, cols.seat)),
       sheet: sheetName
     });
   }
@@ -3568,6 +3724,35 @@ function readFileAsArrayBuffer(file) {
   });
 }
 
+const TEXT_FILE_RE = /\.(csv|tsv|txt)$/i;
+
+// 純文字檔(CSV/TSV)的編碼偵測:校務系統與 Excel「另存 CSV」常吐 Big5,
+// 直接當 UTF-8 讀會整份變亂碼、姓名全被過濾掉。
+function decodeTextBytes(bytes) {
+  if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+    return new TextDecoder('utf-8').decode(bytes.subarray(3));
+  }
+  if (bytes[0] === 0xFF && bytes[1] === 0xFE) return new TextDecoder('utf-16le').decode(bytes);
+  if (bytes[0] === 0xFE && bytes[1] === 0xFF) return new TextDecoder('utf-16be').decode(bytes);
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  } catch (e) {
+    for (const enc of ['big5', 'gbk']) {
+      try { return new TextDecoder(enc).decode(bytes); } catch (e2) { /* 該編碼不支援,換下一個 */ }
+    }
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+}
+
+// 一律走這裡讀檔:xlsx/xls/xlsm/xlsb/ods 走二進位,csv/tsv/txt 先解碼再交給 SheetJS
+async function readWorkbookFromFile(file) {
+  const bytes = await readFileAsArrayBuffer(file);
+  if (TEXT_FILE_RE.test(file.name)) {
+    return XLSX.read(decodeTextBytes(bytes), { type: 'string', raw: false });
+  }
+  return XLSX.read(bytes, { type: 'array' });
+}
+
 function setupDropzone(zoneId, inputId, iconId, textId, fileNameId, kind) {
   const zone = $(zoneId);
   const input = $(inputId);
@@ -3616,10 +3801,9 @@ function setupDropzone(zoneId, inputId, iconId, textId, fileNameId, kind) {
         const baseProgress = (i / files.length) * 100;
         showParseProgress(kind, baseProgress + 2, `讀取中 (${i + 1}/${files.length}):${file.name}`);
         await new Promise(r => requestAnimationFrame(r));
-        const data = await readFileAsArrayBuffer(file);
         showParseProgress(kind, baseProgress + (100 / files.length) * 0.5, `解析中:${file.name}`);
         await new Promise(r => requestAnimationFrame(r));
-        const wb = XLSX.read(data, { type: 'array' });
+        const wb = await readWorkbookFromFile(file);
         let parsed;
         if (kind === 'old') parsed = parseOldWorkbook(wb);
         else parsed = parseNewRoster(wb);
@@ -3644,10 +3828,12 @@ function setupDropzone(zoneId, inputId, iconId, textId, fileNameId, kind) {
 
     const total = kind === 'old' ? state.oldStudents.length : state.newRoster.length;
     if (total === 0) {
-      const hint = kind === 'old'
-        ? '未能解析出任何學生資料,請確認檔案格式(需含「班級:」「語別:」「編號」等欄位)'
-        : '未能解析出任何學生,請確認新名冊包含「姓名、班級、座號」欄位(可點 📥 下載範本參考)';
-      toast(hint, 'error', 7000);
+      const seen = lastHeaderSamples.map(s => `${s.sheet}:${s.cells.slice(0, 8).join('、')}`).join(' | ');
+      const base = kind === 'old'
+        ? '未能解析出任何學生資料。舊名單可以是「班級:／語別:／編號」的矩陣表,也可以是每列一位學生的表格(需有「姓名」+「語別」或「班級」欄)'
+        : '未能解析出任何學生。新名冊需包含「姓名」與「班級」欄位,座號可留空(可點 📥 下載範本參考)';
+      const hint = seen ? `${base}。目前在檔案中讀到的欄位:${seen}` : base;
+      toast(hint, 'error', 9000);
       return;
     }
     const dupeHint = dupeCount ? `,已跳過 ${dupeCount} 筆重複` : '';
