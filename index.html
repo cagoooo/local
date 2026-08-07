@@ -1910,6 +1910,86 @@
     to { opacity: 0; transform: translateX(30px); }
   }
 
+  /* Service Worker Update Toast */
+  .sw-update-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: min(460px, calc(100vw - 32px));
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 16px;
+    background: #0f172a;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--r-xl, 16px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    animation: swToastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  [data-theme="light"] .sw-update-toast {
+    background: #1e293b;
+    color: #f8fafc;
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+  @keyframes swToastIn {
+    from { opacity: 0; transform: translate(-50%, 20px) scale(0.96); }
+    to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  }
+  .sw-update-toast .sw-title {
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+  .sw-update-toast .sw-desc {
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.78);
+    line-height: 1.45;
+    margin-top: 2px;
+  }
+  .sw-update-toast .sw-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sw-update-toast .sw-btn-reload {
+    background: #6366f1;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--t-fast);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+  }
+  .sw-update-toast .sw-btn-reload:hover {
+    background: #4f46e5;
+    transform: translateY(-1px);
+  }
+  .sw-update-toast .sw-btn-close {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 6px;
+    border-radius: 6px;
+    transition: color var(--t-fast);
+  }
+  .sw-update-toast .sw-btn-close:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
   /* ==========================================================
      Modal (overlay)
      ========================================================== */
@@ -5099,6 +5179,107 @@ renderStats = function() {
   });
 };
 renderStats();
+
+// ============================================================
+// Service Worker 註冊與版本自動更新提示 (Prompt-to-refresh)
+// ============================================================
+function _showSwUpdateToast(waitingWorker) {
+  if (document.getElementById('sw-update-toast')) return;
+
+  const toast = document.createElement('div');
+  toast.id = 'sw-update-toast';
+  toast.className = 'sw-update-toast';
+  toast.setAttribute('role', 'alert');
+  toast.innerHTML = `
+    <div style="min-width:0;">
+      <div class="sw-title">✨ 系統有新版本可用</div>
+      <div class="sw-desc">點擊更新載入最新版本，確保取得最新功能與校對修正。</div>
+    </div>
+    <div class="sw-actions">
+      <button id="swReloadBtn" class="sw-btn-reload">立刻更新</button>
+      <button id="swCloseBtn" class="sw-btn-close" aria-label="稍後再說">✕</button>
+    </div>
+  `;
+  document.body.appendChild(toast);
+
+  document.getElementById('swReloadBtn').addEventListener('click', () => {
+    toast.remove();
+    if (waitingWorker) {
+      let _reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!_reloaded) {
+          _reloaded = true;
+          window.location.reload();
+        }
+      });
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    } else {
+      window.location.reload();
+    }
+  });
+
+  document.getElementById('swCloseBtn').addEventListener('click', () => {
+    toast.style.animation = 'swToastIn 0.25s reverse forwards';
+    setTimeout(() => toast.remove(), 240);
+  });
+}
+
+if ('serviceWorker' in navigator) {
+  const isLocalhost = Boolean(
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '[::1]' ||
+    window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
+  );
+
+  // 若在 localhost 開發環境且不需要強登入或 SW 測試，避免快取攔截影響開發
+  // 此處使用 updateViaCache: 'none' 確保生產環境不被 HTTP 快取阻擋 sw.js 檢測
+  navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+    .then(reg => {
+      const watchWorker = (worker) => {
+        worker.addEventListener('statechange', () => {
+          // 線 A：安裝完成且已有舊控制器 (表示是新版本升級而非首次安裝)
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+            _showSwUpdateToast(worker);
+          }
+        });
+      };
+
+      // 第一時間檢查是否有處於 waiting 狀態的新 Worker
+      if (reg.waiting) {
+        _showSwUpdateToast(reg.waiting);
+      }
+
+      if (reg.installing) watchWorker(reg.installing);
+
+      reg.addEventListener('updatefound', () => {
+        if (reg.installing) watchWorker(reg.installing);
+      });
+
+      // 線 B：SW activate 完成發送訊息之安全備份
+      navigator.serviceWorker.addEventListener('message', e => {
+        if (e.data?.type === 'SW_ACTIVATED' && navigator.serviceWorker.controller) {
+          _showSwUpdateToast(null);
+        }
+      });
+    })
+    .catch(err => {
+      if (!isLocalhost) console.warn('[SW] 註冊失敗:', err);
+    });
+}
+
+// 三層自癒防護：監聽腳本/資源動態載入失敗
+window.addEventListener('error', (event) => {
+  const msg = event.message || (event.reason && event.reason.message) || '';
+  if (/Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed/i.test(msg)) {
+    const FLAG = 'sw_chunk_reload_attempted';
+    try {
+      if (sessionStorage.getItem(FLAG) === '1') return;
+      sessionStorage.setItem(FLAG, '1');
+    } catch (e) {}
+    console.warn('[SW Self-Heal] 偵測到資產載入錯誤，自動重新載入頁面:', msg);
+    setTimeout(() => window.location.reload(), 500);
+  }
+}, true);
 </script>
 </body>
 </html>
