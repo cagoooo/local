@@ -32,6 +32,7 @@
 | **Excel 匯出** | 兩種格式:**平面對照表**(含清名、族別、狀態)+ **矩陣名單**(依新班級分組,含異動標記、疑似配對區、多候選區、未配對附錄) |
 | **UI/UX** | Noto Sans TC 繁中字型、**深色模式自動切換**、RWD 響應式、sticky navigation、錯落 fade-in 動畫、支援 `prefers-reduced-motion` |
 | **完全離線** | 所有解析、比對、匯出都在瀏覽器本機執行,學生資料不會上傳到任何伺服器 |
+| **新版本提示** | 以 Service Worker 快取網頁,有新版部署時畫面下方跳出「系統有新版本可用」提示,按「立刻更新」就換成最新版(不必手動清快取);部署前執行 `scripts/bump-version.ps1` 更新 `sw.js` 的版本號 |
 
 ---
 
@@ -528,6 +529,7 @@ native-lang-matcher/
 
 | 版本 | 日期 | 功能數 | 主要變動 |
 |------|------|:-----:|---------|
+| **2026-08-07** | 2026-08-07 | — | 解析器大升級(一列一生表格、方言名語別、CSV/Big5 等格式)+ Service Worker 新版本提示 |
 | **v2.6** | 2026-04-21 | **44** | 實戰驗證:301 班級格式、低配對警示、健康度指標、分組未配對 |
 | **v2.5** | 2026-04-21 | 39 | 品質升級:資料 lint、格式自動修正、班級視覺化、重複上傳偵測 |
 | **v2.3** | 2026-04-21 | 35 | 精緻化小品:ripple、tooltip、skeleton、progress bar、confetti |
@@ -553,7 +555,7 @@ native-lang-matcher/
 ---
 
 **製作**:以 Claude Code + Anthropic Claude 產生  
-**維護**:桃園市某國小資訊教師
+**維護**:[阿凱老師](https://www.smes.tyc.edu.tw/modules/school/index.php?department_id=2&zone_id=0&page_id=2&content_id=11&type=news&from_op=all_news#a5)(桃園市龍潭區石門國民小學)
 
 ---
 
